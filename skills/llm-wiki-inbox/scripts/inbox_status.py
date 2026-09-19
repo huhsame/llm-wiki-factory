@@ -4,7 +4,13 @@
 세는 것
   raw_files      raw/ 안 파일 수. 이름이 _ 로 시작하는 파일과 폴더는 빼고 셉니다
   ledger_rows    장부에 적힌 원본 파일 줄 수
-  unprocessed    장부에 아직 없는 창고 파일 수 (= 아직 안 들어간 것)
+  unprocessed    장부에 아직 없는 창고 파일 수 (= 장부에 줄이 아직 없는 것)
+  pending        장부에 있지만 아직 판정 전인 줄 수 (상태가 대기 또는 보류)
+                 unprocessed 와 pending 은 다른 숫자입니다. 하나로 합치지 마세요.
+                 진단이 raw 전수를 장부에 적고 나면 unprocessed 는 0 이 되지만
+                 pending 은 남습니다. 0 하나만 보고 "다 처리됐다"고 하면 틀립니다.
+  pending_wait   그중 대기
+  pending_hold   그중 보류
   realtime_new   그중 실시간 트랙이 가져온 것 (상태 파일의 realtime_files 기준)
   backlog        그 나머지 (= 밀린 것. 과거 트랙이 받아 둔 것이 여기로 갑니다)
   ledger_found   장부 파일을 찾았는지. false 면 unprocessed 숫자를 믿으면 안 됩니다
@@ -16,6 +22,7 @@
 출력 JSON (stdout 한 줄)
   {"ok":true,"raw_files":163,"ledger_rows":23,"ledger_found":true,
    "unprocessed":140,"realtime_new":3,"backlog":137,
+   "pending":5,"pending_wait":4,"pending_hold":1,
    "sources":[{"label":"메일:me@example.com","kind":"mail","first_run_done":false,
    "backfill_start":"2026-04","backfill_cursor":"2026-06","backlog_remaining":2,
    "last_run":"2026-09-19T23:04:11+09:00","last_error":null}]}
@@ -73,8 +80,10 @@ def ledger_path(wiki: pathlib.Path):
     return None
 
 
-def ledger_rows(path) -> set:
+def ledger_rows(path):
+    """장부에서 (원본 파일 이름 집합, 상태별 줄 수) 를 냅니다."""
     rows = set()
+    states = {"대기": 0, "보류": 0, "올림": 0, "버림": 0}
     fenced = False
     for line in path.read_text(encoding="utf-8").splitlines():
         if line.lstrip().startswith("```"):  # 예시 블록 안은 세지 않습니다
@@ -88,7 +97,10 @@ def ledger_rows(path) -> set:
         name = re.sub(r"^`|`$", "", cells[1])
         if name and name != "-":
             rows.add(C.nfc(name.replace("\\", "/")))
-    return rows
+        state = C.nfc(re.sub(r"[`*]", "", cells[2]))
+        if state in states:
+            states[state] += 1
+    return rows, states
 
 
 def main() -> None:
@@ -106,7 +118,7 @@ def main() -> None:
     state = C.load_state(wiki)
     files = raw_files(wiki)
     book = ledger_path(wiki)
-    ledger = ledger_rows(book) if book else set()
+    ledger, states = ledger_rows(book) if book else (set(), {"대기": 0, "보류": 0, "올림": 0, "버림": 0})
     # 장부에 파일 이름만 적힌 옛 줄도 맞다고 봅니다(경로 규칙이 바뀌기 전 자료).
     # 다만 같은 이름이 여러 폴더에 있으면 어느 것인지 모르므로 그때는 안 맞다고 봅니다.
     legacy = {row for row in ledger if "/" not in row}
@@ -129,6 +141,10 @@ def main() -> None:
         "unprocessed": len(unprocessed),
         "realtime_new": len(realtime),
         "backlog": len(unprocessed) - len(realtime),
+        # 장부에 줄은 있는데 아직 판정 전인 것. unprocessed 와 겹치지 않는 다른 숫자입니다.
+        "pending": states["대기"] + states["보류"],
+        "pending_wait": states["대기"],
+        "pending_hold": states["보류"],
         "mail_filter_domains": state.get("mail_filter_domains", []),
         "sources": [{"label": key, "kind": src.get("kind"),
                      "first_run_done": src.get("first_run_done"),
@@ -140,7 +156,7 @@ def main() -> None:
                     for key, src in state.get("sources", {}).items()],
     }
     if book is None:
-        report["note"] = "장부(wiki/장부.md)를 못 찾았어요. 아직 안 들어간 숫자를 그대로 믿지 마세요."
+        report["note"] = "장부(wiki/장부.md)를 못 찾았어요. unprocessed 와 pending 을 그대로 믿지 마세요."
     if args.list:
         report["unprocessed_files"] = unprocessed[:200]
         report["realtime_files"] = realtime[:200]

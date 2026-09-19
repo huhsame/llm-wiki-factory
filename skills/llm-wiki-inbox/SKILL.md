@@ -101,8 +101,7 @@ python "<스킬폴더>/scripts/kakao_collect.py" --wiki "C:/Users/나/Documents/
 
 현황은 이렇게 알려 드려요.
 
-> 새로 온 것 **3건** · 아직 안 들어간 것 **140건 중 20건**을 이번에 할 수 있어요.
-> 예전 것은 **6개월 중 3개월치**를 받아 뒀어요.
+> 새로 온 것 **3건** · 장부에 아직 없는 것 **140건 중 20건**을 이번에 할 수 있어요. 장부에 있지만 판정 전인 것도 **5건** 있어요. 예전 것은 **6개월 중 3개월치**를 받아 뒀어요.
 
 숫자는 `scripts/inbox_status.py`가 세요. 제가 어림하지 않아요.
 
@@ -110,7 +109,7 @@ python "<스킬폴더>/scripts/kakao_collect.py" --wiki "C:/Users/나/Documents/
 python "<스킬폴더>/scripts/inbox_status.py" --wiki "C:/Users/나/Documents/내위키"
 ```
 
-- `ledger_found`가 `false`면 **장부 파일을 못 찾은 거예요.** 그때는 숫자를 읽어 드리지 말고 장부부터 찾아요.
+- **`unprocessed`와 `pending`은 다른 숫자예요. 합치지 않아요.** `unprocessed`는 **장부에 줄이 아직 없는 창고 파일**이고, `pending`은 **장부에 줄은 있는데 아직 판정 전인 것**(`대기`+`보류`)이에요. 진단이 창고 전수를 장부에 적고 나면 `unprocessed`는 0이 되는데, 그걸 보고 「다 처리됐어요」라고 하면 틀려요. `pending`이 남아 있으면 「밀린 거 처리해줘」로 이어져요. `ledger_found`가 `false`면 **장부 파일을 못 찾은 거예요.** 그때는 두 숫자를 읽어 드리지 말고 장부부터 찾아요.
 - 한 달에 메일이 아주 많으면 그 달은 상한(400통)에 걸려요. 결과에 `truncated`가 나오면 그 달은 나눠서 다시 받아요.
 - 상태는 `raw/_수집상태.json`에 있어요. **이름이 `_`로 시작하는 파일과 폴더는 자료가 아니에요.** 장부에도 안 올라가요. 자세한 것은 `references/상태와장부.md`에 있어요.
 
@@ -138,6 +137,8 @@ Get-ScheduledTaskInfo -TaskName "내위키 야간수집" | Select-Object LastRun
 
 `LastTaskResult`가 `0`이면 **작업이 돌았다는 뜻**이에요. 잘 됐는지는 두 가지로 봐요 · ① 창고에 파일이 늘었는지 ② `<위키폴더>\.inbox\collect.log` 마지막 줄의 `mail=`·`kakao=`가 둘 다 `0`인지요. `2`면 한쪽이 막힌 거고 그 줄 위에 이유가 적혀 있어요. 끄는 법과 macOS 방법, ②·④의 명령은 `references/자동화.md`에 있어요.
 
+**연결하고 나서·자동화를 걸고 나서 위키 루트의 `안내.html`을 다시 채워요.** 연결 줄·자동화 줄·말 한마디 지도가 바뀌어요. 채우는 법은 `llm-wiki-factory` 스킬의 `references/안내페이지.md`에 있어요. **물어보지 않고 해요.**
+
 **미리 말씀드릴 것 셋** · ① 컴퓨터가 꺼져 있으면 안 돌아요 ② **대화를 풀 키를 아직 못 받았으면 카톡은 건너뛰어요.** 한 번 `recover`로 키를 받아 두면 그다음부터는 카카오톡이 꺼져 있어도 모아져요 ③ 그래서 컴퓨터를 켜 두시는 시각으로 걸어요.
 
 ## 7. 비밀번호
@@ -163,8 +164,7 @@ Get-ScheduledTaskInfo -TaskName "내위키 야간수집" | Select-Object LastRun
 - **둘러봤는데 표가 거의 비어요** · 자료가 아직 적은 거예요. 고장이 아니에요. 쌓인 뒤에 "둘러봐줘"를 한 번 더 하시면 돼요.
 - **방을 못 찾겠대요** · 방 이름이 바뀐 거예요. `rooms`로 다시 보고 **방 번호로** 등록해요.
 - **파이썬이 없대요** · python.org에서 **Windows installer (64-bit)** 를 받고 설치할 때 **Add python.exe to PATH**를 체크하세요. 설치 후 Claude 앱을 껐다 켜요(작업표시줄 숨은 아이콘 우클릭 → 종료).
-- 오류 문구별 다음 행동은 `references/메일연결.md`·`references/카톡연결.md`의 표에 있어요.
-- 그래도 안 되면 **무엇을 하려다 어디서 멈췄는지** 적어서 huhsame.com 게시판이나 ai@huhsame.com으로 보내 주세요.
+- 오류 문구별 다음 행동은 `references/메일연결.md`·`references/카톡연결.md`의 표에 있어요. 그래도 안 되면 **무엇을 하려다 어디서 멈췄는지** 적어서 huhsame.com 게시판이나 ai@huhsame.com으로 보내 주세요.
 
 ## 참고
 

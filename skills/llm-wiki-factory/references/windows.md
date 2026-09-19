@@ -95,39 +95,7 @@ cp -R ~/Documents/내위키 ~/Documents/내위키_백업_2026-09-19
 
 ## 10. 원본 파일이 안 읽힐 때
 
-순서는 SKILL.md 4절에 있고, 여기는 **글자를 어떻게 뽑는지**만 적어요. **설치할 건 하나도 없어요.**
-
-**Word(`.docx`)와 PPT(`.pptx`)** 는 속이 zip이에요. 파이썬 기본 기능만으로 글자가 나와요.
-
-```python
-import zipfile, re
-def 글자뽑기(경로, 안쪽):
-    with zipfile.ZipFile(경로) as z:
-        붙임 = "".join(z.read(n).decode("utf-8", "replace")
-                       for n in z.namelist() if re.match(안쪽, n))
-    붙임 = re.sub(r"</w:p>|</a:p>", "\n", 붙임)
-    return re.sub(r"<[^>]+>", "", 붙임)
-
-print(글자뽑기("raw/회의록.docx", r"word/document\.xml"))
-print(글자뽑기("raw/시안.pptx",  r"ppt/slides/slide\d+\.xml"))
-```
-
-**메일(`.eml`)** 은 그냥 열면 한글이 `=EC=9A=B4` 같은 모양으로 깨져 보여요. 열린 게 아니에요.
-
-```python
-import email, email.policy
-m = email.message_from_file(open("raw/승인.eml", encoding="utf-8"),
-                            policy=email.policy.default)
-print(m["subject"], m["from"], m["date"])
-print(m.get_body(("plain",)).get_content())
-```
-
-**엑셀(`.xlsx`)** 은 `openpyxl`이 이미 깔려 있으면 그걸 쓰고, 없으면 Word와 같은 방식으로 `xl/sharedStrings.xml`과 `xl/worksheets/sheet*.xml`에서 뽑아요.
-
-**PDF와 사진**은 대개 파일 읽기 도구로 그냥 열려요. 안 열리면 사용자에게 다시 저장을 부탁드려요.
-
-- 뽑은 글자는 **위키 페이지에 요약으로만** 넣어요. `raw/` 옆에 변환 파일을 만들지 않아요.
-- 그래도 안 열리면 「다른 이름으로 저장」으로 텍스트나 PDF를 받고, 그동안은 장부에 `보류`로 둬요.
+순서는 SKILL.md 4절에 있고, **글자를 뽑는 코드는 `references/원본읽기.md`에 있어요.** Word·PPT·엑셀·메일 전부 파이썬에 처음부터 들어 있는 기능으로 풀려요. **설치할 건 하나도 없어요.**
 
 ## 11. 깔아야 할 건 없어요
 
