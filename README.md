@@ -1,5 +1,7 @@
 # llm-wiki-factory
 
+스킬 두 개 · 파이썬 표준 기능만 · 설치는 링크 한 줄.
+
 **자료는 쌓이는데 찾지를 못하는 문제를, 폴더를 더 나누지 않고 푸는 스킬입니다.**
 
 *A skill that turns your own files into a personal wiki an AI keeps writing for you.*
@@ -23,17 +25,141 @@
 
 ## 설치
 
+Claude Code(데스크톱 앱의 Code 탭)에 이렇게 말하면 됩니다.
+
 ```
-/plugin marketplace add huhsame/llm-wiki-factory
-/plugin install llm-wiki-factory@llm-wiki-factory
+https://github.com/huhsame/llm-wiki-factory 여기 들어가서 세팅해줘
 ```
 
-명령이 안 먹으면 그냥 이렇게 말해도 됩니다.
-**"https://github.com/huhsame/llm-wiki-factory 여기 들어가서 이 Skill 설치해 줘"**
+그러면 Claude가 아래 절차대로 알아서 깔아 줍니다. 다 되면 **Claude를 껐다 켜시거나 새 대화를 여신 다음** **"위키 만들어줘"** 한 마디로 시작하시면 됩니다. 스킬 목록은 대화가 시작될 때 읽히기 때문에, 설치하던 그 대화에서는 방금 깐 스킬이 아직 안 잡힙니다.
 
-설치하면 어느 폴더에서 작업하든 따라옵니다. 실습 폴더를 옮겨도 유지됩니다.
+한 번 깔면 어느 폴더에서 작업하든 따라옵니다. 실습 폴더를 옮겨도 유지됩니다.
 
 ---
+
+### AI가 읽는 설치 절차
+
+> 사용자가 이 저장소 주소를 주면서 "세팅해줘"라고 하면, 아래를 **Claude가 직접 실행**한다. 사용자에게 명령을 받아 치게 하지 않는다. 경로에 한글이나 공백이 섞일 수 있으니 모든 경로를 큰따옴표로 감싼다.
+>
+> **블록은 쪼개지 말고 통째로 한 번에 실행한다.** 셸은 명령을 부를 때마다 새로 뜨기 때문에 `$tmp`·`$src`·`$dest` 같은 변수가 다음 호출로 넘어가지 않는다. 줄 단위로 나눠 실행하면 변수가 빈 값이 되어 **이미 깔려 있던 스킬을 지우고 아무것도 못 까는** 상태가 된다.
+>
+> **Windows는 PowerShell 문법이다.** `powershell -NoProfile -Command "<블록 전체>"` 로 한 번에 실행한다. bash 레인에 그대로 넣지 않는다.
+
+#### ① 먼저 확인만 한다 (아무것도 바꾸지 않는다)
+
+**Windows (PowerShell)**
+
+```powershell
+$dest = Join-Path $env:USERPROFILE ".claude\skills"
+Get-Command git -ErrorAction SilentlyContinue | Select-Object -First 1 Name
+Test-Path (Join-Path "$dest" "llm-wiki-factory")
+Test-Path (Join-Path "$dest" "llm-wiki-inbox")
+```
+
+**macOS / Linux**
+
+```bash
+dest="$HOME/.claude/skills"
+command -v git || echo "git 없음"
+ls -d "$dest/llm-wiki-factory" "$dest/llm-wiki-inbox" 2>/dev/null || echo "아직 안 깔려 있음"
+```
+
+`Test-Path` 가 하나라도 `True` 면(macOS는 경로가 찍히면) **이미 깔려 있는 것**이다. 그때는 "이미 깔려 있어요. 최신 걸로 덮어쓸까요?" 라고 묻고, **답을 듣기 전에는 ②로 넘어가지 않는다.** ②는 있던 폴더를 지우고 복사하므로 되돌릴 수 없다.
+
+#### ② 받아서 옮기고 정리까지 한 번에 한다
+
+> **사용자 답을 받은 뒤에만 실행한다.** 아래 한 덩어리 안에 받기·복사·확인·정리가 다 들어 있다. 반드시 통째로 한 번에 실행한다.
+
+**Windows (PowerShell)**
+
+```powershell
+$ProgressPreference = "SilentlyContinue"
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
+$tmp  = Join-Path $env:TEMP "llm-wiki-factory-setup"
+$zip  = Join-Path $env:TEMP "llm-wiki-factory.zip"
+$dest = Join-Path $env:USERPROFILE ".claude\skills"
+Remove-Item -LiteralPath "$tmp" -Recurse -Force -ErrorAction SilentlyContinue
+New-Item -ItemType Directory -Force -Path "$dest" | Out-Null
+
+# 1) 받는다. git 이 있으면 clone, 없거나 실패하면 zip
+$src = $null
+if (Get-Command git -ErrorAction SilentlyContinue) {
+  git clone --depth 1 https://github.com/huhsame/llm-wiki-factory.git "$tmp" 2>&1 | Out-Null
+  if (Test-Path -LiteralPath (Join-Path "$tmp" "skills")) { $src = Join-Path "$tmp" "skills" }
+}
+if (-not $src) {
+  Invoke-WebRequest -Uri "https://github.com/huhsame/llm-wiki-factory/archive/refs/heads/main.zip" -OutFile "$zip" -UseBasicParsing
+  Expand-Archive -LiteralPath "$zip" -DestinationPath "$tmp" -Force
+  $src = Join-Path "$tmp" "llm-wiki-factory-main\skills"
+}
+
+# 2) 받은 게 확인될 때만 옮긴다. 있던 폴더는 먼저 지운다
+#    (지우지 않고 덮으면 llm-wiki-factory\llm-wiki-factory 처럼 한 겹 더 들어간다)
+if ((Test-Path -LiteralPath (Join-Path "$src" "llm-wiki-factory")) -and (Test-Path -LiteralPath (Join-Path "$src" "llm-wiki-inbox"))) {
+  foreach ($n in "llm-wiki-factory", "llm-wiki-inbox") {
+    $target = Join-Path "$dest" $n
+    if (Test-Path -LiteralPath "$target") { Remove-Item -LiteralPath "$target" -Recurse -Force }
+    Copy-Item -LiteralPath (Join-Path "$src" $n) -Destination "$dest" -Recurse -Force
+  }
+  # 3) 제자리에 있는지 확인한다. 둘 다 True 여야 끝난 것이다
+  Test-Path (Join-Path "$dest" "llm-wiki-factory\SKILL.md")
+  Test-Path (Join-Path "$dest" "llm-wiki-inbox\SKILL.md")
+} else {
+  Write-Host "저장소를 받지 못했어요. 인터넷 연결과 주소를 확인해 주세요."
+}
+
+# 4) 임시로 받아 둔 것을 지운다
+Remove-Item -LiteralPath "$tmp" -Recurse -Force -ErrorAction SilentlyContinue
+Remove-Item -LiteralPath "$zip" -Force -ErrorAction SilentlyContinue
+```
+
+**macOS / Linux**
+
+```bash
+tmp="${TMPDIR:-/tmp}/llm-wiki-factory-setup"
+zip="$tmp.zip"
+dest="$HOME/.claude/skills"
+rm -rf "$tmp" "$zip"
+mkdir -p "$dest"
+
+# 1) 받는다. git 이 있으면 clone, 없거나 실패하면 zip
+src=""
+if command -v git >/dev/null 2>&1 && git clone --depth 1 https://github.com/huhsame/llm-wiki-factory.git "$tmp" >/dev/null 2>&1; then
+  src="$tmp/skills"
+fi
+if [ ! -d "$src" ]; then
+  curl -fsSL -o "$zip" https://github.com/huhsame/llm-wiki-factory/archive/refs/heads/main.zip
+  mkdir -p "$tmp" && unzip -q "$zip" -d "$tmp"
+  src="$tmp/llm-wiki-factory-main/skills"
+fi
+
+# 2) 받은 게 확인될 때만 옮긴다. 있던 폴더는 먼저 지운다
+if [ -d "$src/llm-wiki-factory" ] && [ -d "$src/llm-wiki-inbox" ]; then
+  for n in llm-wiki-factory llm-wiki-inbox; do
+    rm -rf "$dest/$n"
+    cp -R "$src/$n" "$dest/$n"
+  done
+  # 3) 제자리에 있는지 확인한다. 두 경로가 그대로 찍혀야 끝난 것이다
+  ls "$dest/llm-wiki-factory/SKILL.md" "$dest/llm-wiki-inbox/SKILL.md"
+else
+  echo "저장소를 받지 못했어요. 인터넷 연결과 주소를 확인해 주세요."
+fi
+
+# 4) 임시로 받아 둔 것을 지운다
+rm -rf "$tmp" "$zip"
+```
+
+가져갈 것은 `skills/llm-wiki-factory` 와 `skills/llm-wiki-inbox` 두 폴더뿐이다. 목적지는 Windows가 `%USERPROFILE%\.claude\skills\`, macOS가 `~/.claude/skills/` 다.
+
+확인 줄이 하나라도 `False` 거나 경로가 안 찍히면 ②를 다시 한 번 통째로 실행한다.
+
+#### ③ 이 두 줄로 끝낸다
+
+> 다 됐어요. **Claude를 껐다 켜시거나 새 대화를 열어** 주세요.
+> 그다음 **"위키 만들어줘"** 라고 하시면 시작합니다.
+
+**재시작 안내를 빼먹지 않는다.** 스킬 목록은 대화가 시작될 때 한 번 읽히기 때문에, 방금 복사한 스킬은 설치하던 이 대화에서는 아직 안 잡힌다.
 
 ## 설치하고 처음 할 말
 
@@ -57,7 +183,7 @@
 
 ## 카톡·메일 연결은 llm-wiki-inbox
 
-자료를 손으로 넣는 게 번거로워지면 **"카톡 연결해줘"** 또는 **"메일 연결해줘"** 라고 하세요. 두 번째 스킬이 질문 다섯 개 안에서 세팅을 끝냅니다.
+자료를 손으로 넣는 게 번거로워지면 **"카톡 연결해줘"** 또는 **"메일 연결해줘"** 라고 하세요. 두 번째 스킬이 질문 여섯 개 안에서 세팅을 끝냅니다.
 
 - **메일** · 앱 비밀번호와 IMAP 하나로 지메일·네이버·회사 메일을 같은 방법으로 가져옵니다. 받은편지함만 보고, 읽음 표시를 바꾸지 않습니다. 광고·알림은 버리지 않고 `_걸러짐` 폴더로 보냅니다.
 - **카톡** · 수업에서 받은 카톡 읽기 스킬이 있으면 그 결과를 창고로 옮깁니다(Windows 전용). 없으면 카카오톡 PC의 **대화 내보내기** 로도 됩니다.
@@ -92,7 +218,7 @@
 
 **옵시디언으로 볼 수 있나요?** 위키 폴더를 볼트로 열기만 하면 됩니다. 플러그인은 필요 없습니다. `[[링크]]`를 쓰고 페이지 맨 위 정보를 한 줄짜리 값으로만 쓴 게 이것 때문입니다.
 
-**뭘 깔아야 하나요?** 위키 본체는 아닙니다. 이건 프로그램이 아니라 **규칙 모음**입니다. 설치할 것도, 깃도, 네트워크를 쓰는 것도 없습니다. Claude가 자료를 정리하기 전에 읽는 문서 한 장과 **파일 틀 다섯 개, 페이지 틀 하나**가 전부입니다. Word·PPT·메일이 잘 안 읽히는 경우에만 파이썬에 처음부터 들어 있는 기능으로 글자를 뽑습니다. 따로 받을 건 없습니다. 카톡·메일 자동 수집(llm-wiki-inbox)을 쓰실 때만 파이썬이 깔려 있어야 하고, 그때도 표준 기능만 씁니다.
+**뭘 깔아야 하나요?** 위키 본체는 아닙니다. 이건 프로그램이 아니라 **규칙 모음**입니다. 쓰는 동안 돌아가는 프로그램도, 깃도, 네트워크도 없습니다(파일을 받아오는 설치 때만 인터넷을 씁니다). Claude가 자료를 정리하기 전에 읽는 문서 한 장과 **파일 틀 다섯 개, 페이지 틀 하나**가 전부입니다. Word·PPT·메일이 잘 안 읽히는 경우에만 파이썬에 처음부터 들어 있는 기능으로 글자를 뽑습니다. 따로 받을 건 없습니다. 카톡·메일 자동 수집(llm-wiki-inbox)을 쓰실 때만 파이썬이 깔려 있어야 하고, 그때도 표준 기능만 씁니다.
 
 **이미 제 손으로 위키를 만들었는데요.** 그대로 두고 "위키 점검해줘"만 돌려 보세요. 목차에 빠진 페이지와 어긋나는 내용을 찾아 줍니다.
 
@@ -143,7 +269,7 @@ Windows 한글 환경과 비개발자 사용을 기준으로 만들었습니다.
 
 ## In English
 
-Your files pile up, and you still can't answer "how much was that quote?" This skill has Claude build a small wiki next to your files: you drop originals into `raw/`, say "put this in the wiki" in Korean or English, and Claude decides what to promote, what to drop (with a reason, in a ledger), and what to ask you about. Every page lands in a one-line index, every answer cites its page, and a weekly check counts what's missing or contradictory. Nothing to install, no git, no network. It is a set of rules plus five file templates and one page template, written for Windows users with Korean filenames who are not developers. Obsidian works out of the box. A second skill, `llm-wiki-inbox`, pulls KakaoTalk and email into the same `raw/` folder on two tracks (new mail since last run, plus an old backlog drained a month at a time) using only the Python standard library; app passwords are stored in Windows DPAPI or the macOS keychain, never in a file you can read. It has been smoke-tested with fixtures only, not against live accounts.
+Your files pile up, and you still can't answer "how much was that quote?" This skill has Claude build a small wiki next to your files: you drop originals into `raw/`, say "put this in the wiki" in Korean or English, and Claude decides what to promote, what to drop (with a reason, in a ledger), and what to ask you about. Every page lands in a one-line index, every answer cites its page, and a weekly check counts what's missing or contradictory. Nothing runs in the background, no git, no network while you use it. It is a set of rules plus five file templates and one page template, written for Windows users with Korean filenames who are not developers. Obsidian works out of the box. A second skill, `llm-wiki-inbox`, pulls KakaoTalk and email into the same `raw/` folder on two tracks (new mail since last run, plus an old backlog drained a month at a time) using only the Python standard library; app passwords are stored in Windows DPAPI or the macOS keychain, never in a file you can read. It has been smoke-tested with fixtures only, not against live accounts.
 
 ---
 

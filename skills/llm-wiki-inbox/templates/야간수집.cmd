@@ -4,6 +4,7 @@ rem llm-wiki-inbox nightly collect. Fetch only: no judging, no wiki pages.
 rem Put this file in <wiki folder>\.inbox\ . WIKI is worked out from that location,
 rem so a Korean wiki folder name is fine and nothing has to be typed twice.
 rem Fill in PY and SKILL below with full paths. Claude works both of them out for you.
+rem SKILL is normally %USERPROFILE%\.claude\skills\llm-wiki-inbox
 for %%I in ("%~dp0..") do set "WIKI=%%~fI"
 set "SKILL=C:\Users\me\.claude\skills\llm-wiki-inbox"
 set "PY=C:\Users\me\AppData\Local\Programs\Python\Python312\python.exe"
