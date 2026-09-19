@@ -73,6 +73,7 @@ def blank_state(wiki: pathlib.Path) -> dict:
         "updated_at": None,
         "realtime_files": [],
         "mail_filter_domains": [],
+        "survey": None,  # 둘러보기 회차 기록(고른 방·뺀 방·거른 곳). 수집 진행에는 안 씁니다
         "sources": {},
     }
 
@@ -88,6 +89,7 @@ def load_state(wiki: pathlib.Path) -> dict:
             if state.get("format") == FORMAT:
                 state.setdefault("realtime_files", [])
                 state.setdefault("mail_filter_domains", [])
+                state.setdefault("survey", None)
                 state.setdefault("sources", {})
                 return state
         except Exception:

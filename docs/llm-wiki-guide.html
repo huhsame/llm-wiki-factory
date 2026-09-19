@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LLM 위키 스킬 안내</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Geist+Mono:wght@400;500&family=Noto+Sans+KR:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --paper:#fafaf8; --paper-2:#f5f3ed; --card:#ffffff;
+  --ink:#1a1a1a; --muted:#5e5e5e; --soft:#858585;
+  --rule:rgba(26,26,26,0.12); --rule-solid:#b5b5b5;
+  --accent:#c9422b; --accent-tint:rgba(201,66,43,0.07);
+  --hl:#fff066; --on-hl:#1a1a1a;
+  --code-bg:#f2efe7; --code-ink:#1a1a1a;
+  --font-hand:'Gaegu','Nanum Pen Script','Apple SD Gothic Neo',cursive;
+  --font-sans:'Pretendard','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+  --font-mono:'Geist Mono','SFMono-Regular',ui-monospace,'Menlo',monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#1e1e1e; --paper-2:#262626; --card:#262626;
+    --ink:#e8e4dc; --muted:#a8a8a8; --soft:#8a8a8a;
+    --rule:rgba(232,228,220,0.14); --rule-solid:#3a3a3a;
+    --accent:#e05a3a; --accent-tint:rgba(224,90,58,0.12);
+    --hl:#fff066; --on-hl:#1a1a1a;
+    --code-bg:#242424; --code-ink:#e8e4dc;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#1e1e1e; --paper-2:#262626; --card:#262626;
+  --ink:#e8e4dc; --muted:#a8a8a8; --soft:#8a8a8a;
+  --rule:rgba(232,228,220,0.14); --rule-solid:#3a3a3a;
+  --accent:#e05a3a; --accent-tint:rgba(224,90,58,0.12);
+  --hl:#fff066; --on-hl:#1a1a1a;
+  --code-bg:#242424; --code-ink:#e8e4dc;
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:var(--font-sans); font-size:16px; line-height:1.8;
+  -webkit-text-size-adjust:100%;
+}
+.wrap{max-width:1020px; margin:0 auto; padding-inline:16px}
+@media (min-width:760px){ .wrap{padding-inline:32px} }
+
+a{color:var(--accent)}
+a:focus-visible, .toc a:focus-visible{outline:2px solid var(--accent); outline-offset:3px; border-radius:3px}
+
+.eyebrow{
+  font-family:var(--font-mono); font-size:0.68rem; letter-spacing:0.18em;
+  text-transform:uppercase; color:var(--soft); margin:0 0 10px;
+}
+
+header.top{padding-block:44px 8px}
+h1{
+  font-family:var(--font-hand); font-weight:700;
+  font-size:clamp(2.4rem,9vw,4rem); line-height:1.1; margin:0 0 14px;
+  text-wrap:balance; letter-spacing:-0.01em;
+}
+.oneline{
+  font-family:var(--font-hand); font-size:clamp(1.35rem,4.6vw,2rem);
+  line-height:1.5; margin:0 0 14px; color:var(--ink); text-wrap:balance;
+}
+.standfirst{margin:0; color:var(--muted); max-width:62ch; font-size:1rem}
+
+.hl-mark{
+  background:linear-gradient(to bottom,transparent 56%,var(--hl) 56%,var(--hl) 92%,transparent 92%);
+  color:var(--on-hl); padding:0 3px;
+}
+
+nav.toc{
+  margin:36px 0 8px; border-top:1px solid var(--rule); border-bottom:1px solid var(--rule);
+  padding-block:18px;
+}
+.toc ol{
+  list-style:none; margin:0; padding:0;
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:6px 24px;
+}
+.toc li{display:flex; gap:10px; align-items:baseline}
+.toc .n{font-family:var(--font-mono); font-size:0.72rem; color:var(--soft); min-width:1.4em}
+.toc a{color:var(--ink); text-decoration:none; border-bottom:1px solid var(--rule)}
+.toc a:hover{border-bottom-color:var(--accent); color:var(--accent)}
+
+section{padding-block:44px; border-top:1px solid var(--rule)}
+section:first-of-type{border-top:none}
+h2{
+  font-family:var(--font-hand); font-weight:700;
+  font-size:clamp(1.8rem,5.4vw,2.5rem); line-height:1.2; margin:0 0 10px; text-wrap:balance;
+}
+h2 .num{color:var(--accent); margin-right:0.35em}
+h3{font-size:1.02rem; font-weight:700; margin:28px 0 8px}
+.lede{margin:0 0 4px; font-size:1.06rem; max-width:64ch; line-height:1.7}
+p{margin:0 0 14px; max-width:66ch}
+.note{color:var(--muted); font-size:0.94rem}
+
+figure{margin:26px 0 8px}
+.fig-hint{
+  display:none; font-family:var(--font-mono); font-size:0.7rem; letter-spacing:0.08em;
+  color:var(--soft); margin:0 0 8px;
+}
+.fig-box{
+  overflow-x:auto; overflow-y:hidden;
+  border:1px solid var(--rule); border-radius:8px;
+  background:var(--paper); padding:12px;
+}
+.fig-box svg{display:block; width:100%; height:auto}
+figcaption{margin-top:12px; color:var(--muted); font-size:0.9rem; max-width:70ch}
+@media (max-width:820px){
+  .fig-box svg{min-width:880px}
+  .fig-hint{display:block}
+}
+
+pre{
+  margin:20px 0; background:var(--code-bg); color:var(--code-ink);
+  border:1px solid var(--rule); border-radius:6px;
+  padding:18px; overflow-x:auto;
+  font-family:var(--font-mono); font-size:0.8rem; line-height:1.95;
+}
+code{font-family:var(--font-mono); font-size:0.88em; background:var(--code-bg); padding:1px 5px; border-radius:3px}
+pre code{background:none; padding:0; font-size:1em}
+
+ol.steps{list-style:none; margin:20px 0 0; padding:0; counter-reset:st}
+ol.steps li{
+  counter-increment:st; position:relative; padding-left:52px;
+  margin-bottom:18px; max-width:66ch;
+}
+ol.steps li::before{
+  content:counter(st); position:absolute; left:0; top:-2px;
+  font-family:var(--font-hand); font-weight:700; font-size:1.7rem; color:var(--accent);
+  line-height:1.2;
+}
+ol.steps b{display:block; font-size:1.02rem}
+ol.steps .t{display:block; font-family:var(--font-mono); font-size:0.72rem;
+  color:var(--soft); letter-spacing:0.06em; line-height:1.6; margin:2px 0 4px}
+
+.cards{
+  display:grid; grid-template-columns:1fr; gap:20px; margin-top:26px;
+}
+.card{
+  background:var(--card); border:2px solid var(--ink);
+  border-radius:130px 10px 115px 10px / 10px 115px 10px 130px;
+  padding:20px 24px;
+}
+@media (min-width:660px){ .cards{grid-template-columns:repeat(2,1fr)} }
+.card h3{margin:0 0 6px; font-family:var(--font-hand); font-size:1.4rem; font-weight:700}
+.card p{margin:0; font-size:0.93rem; color:var(--muted); max-width:none}
+
+table{
+  width:100%; border-collapse:collapse; margin:22px 0 6px;
+  font-size:0.94rem; text-align:left;
+}
+th,td{padding:12px 14px; border-bottom:1px solid var(--rule); vertical-align:top}
+th{
+  font-family:var(--font-mono); font-size:0.68rem; letter-spacing:0.14em;
+  text-transform:uppercase; color:var(--soft); font-weight:500;
+  border-bottom:1px solid var(--rule-solid);
+}
+td:first-child{font-weight:600; white-space:nowrap}
+.table-scroll{overflow-x:auto}
+
+.callout{
+  margin:26px 0 0; padding:18px 22px;
+  background:var(--accent-tint); border-left:3px solid var(--accent); border-radius:0 6px 6px 0;
+}
+.callout p{margin:0; max-width:none}
+.callout p + p{margin-top:8px}
+
+.ask{
+  font-family:var(--font-hand); font-size:1.5rem; line-height:1.5;
+  margin:0 0 6px;
+}
+
+footer{
+  border-top:1px solid var(--rule); padding-block:30px 56px;
+  color:var(--soft); font-size:0.85rem;
+}
+footer p{max-width:70ch; margin:0 0 8px}
+footer .colophon{font-family:var(--font-mono); font-size:0.7rem; letter-spacing:0.08em}
+
+@media (prefers-reduced-motion: reduce){*{animation:none!important; transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+<header class="top">
+  <p class="eyebrow">허세임 AI 수업 · 수강생 안내</p>
+  <h1>LLM 위키 스킬 안내</h1>
+  <p class="oneline">자료는 창고에, 정리는 AI가, <span class="hl-mark">밤에는 가져오기만</span> 해요.</p>
+  <p class="standfirst">설치는 깃허브 주소 한 줄이면 끝나요. 그 뒤로는 말 한마디씩만 하시면 됩니다. 이 안내는 무엇이 깔리고, 어떻게 돌고, 무슨 말을 하면 되는지를 그림으로 먼저 보여 드려요.</p>
+</header>
+
+<nav class="toc" id="toc" aria-label="목차">
+  <ol>
+    <li><span class="n">01</span><a href="#install">무엇이 깔리나</a></li>
+    <li><span class="n">02</span><a href="#factory">어떻게 도나</a></li>
+    <li><span class="n">03</span><a href="#tracks">예전 것과 새 것</a></li>
+    <li><span class="n">04</span><a href="#routine">하루 루틴</a></li>
+    <li><span class="n">05</span><a href="#phrases">말 한마디 지도</a></li>
+    <li><span class="n">06</span><a href="#first30">설치하고 첫 30분</a></li>
+    <li><span class="n">07</span><a href="#safety">안전 규칙 넷</a></li>
+    <li><span class="n">08</span><a href="#stuck">막혔을 때</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<section id="install">
+  <h2><span class="num">01</span>무엇이 깔리나</h2>
+  <p class="lede">깃허브 주소를 주면서 세팅해 달라고 하시면, Claude가 스킬 폴더 두 개를 내 컴퓨터로 옮겨 놔요.</p>
+  <figure><p class="fig-hint">그림이 잘려 보이면 옆으로 밀어 보세요</p><div class="fig-box"><svg id="g1" viewBox="0 0 1200 900" role="img" aria-labelledby="g1-title g1-desc" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block"><title id="g1-title">링크 한 줄로 내 컴퓨터에 깔리는 것</title><desc id="g1-desc">왼쪽 깃허브 저장소의 스킬 폴더 두 개와 README가, 오른쪽 수강생 컴퓨터의 스킬 자리로 복사되고, 그다음 위키 폴더 안에 규칙 파일과 원본 창고와 정리된 위키가 생기는 모습을 보여 주는 설치 지도예요.</desc><defs><style>#g1{--paper:#fafaf8;--paper2:#f5f3ed;--ink:#1a1a1a;--muted:#6b6b6b;--soft:#858585;--rule:rgba(26,26,26,0.12);--rule2:#b5b5b5;--accent:#c9422b;--acct:rgba(201,66,43,0.08);--link:#2b4f8c;--hl:#fff066;--boxbg:#ffffff;--stbg:rgba(26,26,26,0.05);--exbg:rgba(26,26,26,0.03);--exline:rgba(26,26,26,0.30);--inbg:rgba(107,107,107,0.10);--opbg:rgba(26,26,26,0.02);--opline:rgba(26,26,26,0.22);--zone:rgba(26,26,26,0.02);--zoneline:rgba(26,26,26,0.10);}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) #g1{--paper:#1e1e1e;--paper2:#2a2a2a;--ink:#e8e4dc;--muted:#a0a0a0;--soft:#7d7d7d;--rule:rgba(232,228,220,0.12);--rule2:#3a3a3a;--accent:#e05a3a;--acct:rgba(224,90,58,0.14);--link:#7fa3d4;--hl:#fff066;--boxbg:#262626;--stbg:rgba(232,228,220,0.07);--exbg:rgba(232,228,220,0.04);--exline:rgba(232,228,220,0.32);--inbg:rgba(160,160,160,0.14);--opbg:rgba(232,228,220,0.03);--opline:rgba(232,228,220,0.24);--zone:rgba(232,228,220,0.03);--zoneline:rgba(232,228,220,0.11);}}
+:root[data-theme="dark"] #g1{--paper:#1e1e1e;--paper2:#2a2a2a;--ink:#e8e4dc;--muted:#a0a0a0;--soft:#7d7d7d;--rule:rgba(232,228,220,0.12);--rule2:#3a3a3a;--accent:#e05a3a;--acct:rgba(224,90,58,0.14);--link:#7fa3d4;--hl:#fff066;--boxbg:#262626;--stbg:rgba(232,228,220,0.07);--exbg:rgba(232,228,220,0.04);--exline:rgba(232,228,220,0.32);--inbg:rgba(160,160,160,0.14);--opbg:rgba(232,228,220,0.03);--opline:rgba(232,228,220,0.24);--zone:rgba(232,228,220,0.03);--zoneline:rgba(232,228,220,0.11);}
+:root[data-theme="light"] #g1{--paper:#fafaf8;--paper2:#f5f3ed;--ink:#1a1a1a;--muted:#6b6b6b;--soft:#858585;--rule:rgba(26,26,26,0.12);--rule2:#b5b5b5;--accent:#c9422b;--acct:rgba(201,66,43,0.08);--link:#2b4f8c;--hl:#fff066;--boxbg:#ffffff;--stbg:rgba(26,26,26,0.05);--exbg:rgba(26,26,26,0.03);--exline:rgba(26,26,26,0.30);--inbg:rgba(107,107,107,0.10);--opbg:rgba(26,26,26,0.02);--opline:rgba(26,26,26,0.22);--zone:rgba(26,26,26,0.02);--zoneline:rgba(26,26,26,0.10);}
+
+#g1 .pg{fill:var(--paper)}
+#g1 .ttl{font-family:'Gaegu','Nanum Pen Script','Pretendard','Noto Sans KR',cursive;font-size:30px;font-weight:700;fill:var(--ink)}
+#g1 .sttl{font-family:'Pretendard','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:13px;fill:var(--muted)}
+#g1 .eyb{font-family:'Geist Mono','SFMono-Regular',ui-monospace,'Menlo',monospace;font-size:8px;letter-spacing:0.18em;fill:var(--soft)}
+#g1 .keyb{font-family:'Pretendard','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:11px;font-weight:600;fill:var(--soft)}
+#g1 .nm{font-family:'Pretendard','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:13px;font-weight:600;fill:var(--ink)}
+#g1 .nms{font-family:'Pretendard','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:11.5px;font-weight:600;fill:var(--ink)}
+#g1 .sb{font-family:'Pretendard','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:10.5px;fill:var(--muted)}
+#g1 .sbs{font-family:'Pretendard','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:9.5px;fill:var(--soft)}
+#g1 .mn{font-family:'Geist Mono','SFMono-Regular',ui-monospace,'Menlo',monospace;font-size:9px;fill:var(--muted)}
+#g1 .mnb{font-family:'Geist Mono','SFMono-Regular',ui-monospace,'Menlo',monospace;font-size:10.5px;font-weight:500;fill:var(--ink)}
+#g1 .al{font-family:'Pretendard','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:12px;font-weight:500;fill:var(--muted)}
+#g1 .cal{font-family:'Gaegu','Nanum Pen Script','Pretendard','Noto Sans KR',cursive;font-size:17px;fill:var(--ink)}
+#g1 .acc{fill:var(--accent)}
+#g1 .bx{fill:var(--boxbg);stroke:var(--ink);stroke-width:1}
+#g1 .bxst{fill:var(--stbg);stroke:var(--muted);stroke-width:1}
+#g1 .bxin{fill:var(--inbg);stroke:var(--soft);stroke-width:1}
+#g1 .bxop{fill:var(--opbg);stroke:var(--opline);stroke-width:1;stroke-dasharray:4 3}
+#g1 .bxfc{fill:var(--acct);stroke:var(--accent);stroke-width:1.2}
+#g1 .chip{fill:var(--boxbg);stroke:var(--rule2);stroke-width:0.8}
+#g1 .zn{fill:var(--zone);stroke:var(--zoneline);stroke-width:0.8}
+#g1 .msk{fill:var(--paper)}
+#g1 .ln{fill:none;stroke:var(--muted);stroke-width:1.2}
+#g1 .lnd{fill:none;stroke:var(--muted);stroke-width:1;stroke-dasharray:4 3}
+#g1 .hair{stroke:var(--rule);stroke-width:0.8;fill:none}
+#g1 .hair2{stroke:var(--rule2);stroke-width:0.8;fill:none}
+#g1 .tagb{fill:none;stroke:var(--muted);stroke-width:0.8}
+#g1 .taga{fill:var(--acct);stroke:var(--accent);stroke-width:0.8}
+#g1 .mk{fill:var(--muted)}
+#g1 .mka{fill:var(--accent)}
+#g1 .hl{fill:var(--hl)}
+</style><marker id="g1-ar" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon class="mk" points="0 0, 8 3, 0 6"/></marker><marker id="g1-ara" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon class="mka" points="0 0, 8 3, 0 6"/></marker></defs><rect width="100%" height="100%" class="pg"/><text x="40" y="36" class="eyb" text-anchor="start">SETUP · 링크 한 줄로 깔리는 것</text><text x="40" y="74" class="ttl" text-anchor="start">깃허브에 있는 것과 내 컴퓨터에 생기는 것</text><text x="40" y="100" class="sttl" text-anchor="start">왼쪽은 저장소, 오른쪽은 설치가 끝난 뒤 내 컴퓨터 모습이에요</text><rect x="40" y="140" width="340" height="236" rx="8" class="zn"/><rect x="600" y="140" width="560" height="164" rx="8" class="zn"/><rect x="600" y="356" width="560" height="448" rx="8" class="zn"/><path d="M 380,258 L 600,258" class="ln" marker-end="url(#g1-ar)"/><rect x="427.8" y="234" width="124.4" height="16" rx="2" class="msk"/><text x="490" y="246" class="al" text-anchor="middle">링크 주고 세팅해줘</text><path d="M 880,304 L 880,356" class="ln" marker-end="url(#g1-ar)"/><rect x="888" y="322" width="189.2" height="16" rx="2" class="msk"/><text x="895" y="334" class="al" text-anchor="start">앱 껐다 켜고 · 위키 만들어줘</text><text x="56" y="166" class="eyb" text-anchor="start">GITHUB 저장소</text><rect x="60" y="182" width="300" height="56" rx="6" class="msk"/><rect x="60" y="182" width="300" height="56" rx="6" class="bxst"/><text x="76" y="206" class="mnb" text-anchor="start">skills/llm-wiki-factory</text><text x="76" y="226" class="sb" text-anchor="start">위키를 만들고 자료를 판정해요</text><rect x="60" y="246" width="300" height="56" rx="6" class="msk"/><rect x="60" y="246" width="300" height="56" rx="6" class="bxst"/><text x="76" y="270" class="mnb" text-anchor="start">skills/llm-wiki-inbox</text><text x="76" y="290" class="sb" text-anchor="start">카톡·메일을 창고로 가져와요</text><rect x="60" y="310" width="300" height="56" rx="6" class="msk"/><rect x="60" y="310" width="300" height="56" rx="6" class="bxfc"/><text x="76" y="334" class="mnb" text-anchor="start">README.md</text><text x="76" y="354" class="sb" text-anchor="start">AI가 읽는 설치 절차가 적혀 있어요</text><text x="616" y="168" class="keyb" text-anchor="start">설치되는 자리</text><text x="700" y="168" class="mn" text-anchor="start">%USERPROFILE%\.claude\skills\</text><rect x="620" y="180" width="520" height="52" rx="6" class="msk"/><rect x="620" y="180" width="520" height="52" rx="6" class="bx"/><text x="636" y="204" class="mnb" text-anchor="start">llm-wiki-factory</text><text x="636" y="222" class="sb" text-anchor="start">위키를 만들고, 자료를 읽고 판정해요</text><rect x="620" y="240" width="520" height="52" rx="6" class="msk"/><rect x="620" y="240" width="520" height="52" rx="6" class="bx"/><text x="636" y="264" class="mnb" text-anchor="start">llm-wiki-inbox</text><text x="636" y="282" class="sb" text-anchor="start">카톡·메일을 창고로 가져오기만 해요</text><text x="616" y="384" class="keyb" text-anchor="start">내 위키 폴더 · 이름은 직접 정하세요</text><rect x="620" y="396" width="520" height="52" rx="6" class="msk"/><rect x="620" y="396" width="520" height="52" rx="6" class="bx"/><text x="636" y="420" class="mnb" text-anchor="start">CLAUDE.md</text><text x="636" y="438" class="sb" text-anchor="start">새 대화가 이 폴더에서 열리면 먼저 읽는 규칙이에요</text><rect x="620" y="460" width="520" height="92" rx="6" class="msk"/><rect x="620" y="460" width="520" height="92" rx="6" class="bxst"/><text x="636" y="484" class="mnb" text-anchor="start">raw/</text><text x="676" y="484" class="nms" text-anchor="start">원본 창고</text><text x="636" y="506" class="sb" text-anchor="start">카톡 · 방마다 달마다 한 파일로 쌓여요</text><text x="636" y="524" class="sb" text-anchor="start">메일 · 메일 하나가 한 파일로 쌓여요</text><text x="636" y="542" class="sb" text-anchor="start">손으로 넣은 것 · 여기에 끌어다 놓으면 돼요</text><rect x="620" y="564" width="520" height="148" rx="6" class="msk"/><rect x="620" y="564" width="520" height="148" rx="6" class="bx"/><text x="636" y="588" class="mnb" text-anchor="start">wiki/</text><text x="680" y="588" class="nms" text-anchor="start">정리된 위키</text><text x="636" y="612" class="sb" text-anchor="start">index.md · 목차예요. 한 페이지가 한 줄이에요</text><text x="636" y="632" class="sb" text-anchor="start">log.md · 언제 무엇을 했는지 적어요</text><text x="636" y="652" class="sb" text-anchor="start">tags.md · 서랍(태그) 목록이에요</text><text x="636" y="672" class="sb" text-anchor="start">장부.md · 자료 1건이 1줄이에요</text><text x="636" y="692" class="sb" text-anchor="start">페이지들 · AI가 쓴 정리본이에요</text><rect x="620" y="724" width="520" height="68" rx="6" class="msk"/><rect x="620" y="724" width="520" height="68" rx="6" class="bxop"/><text x="636" y="748" class="mnb" text-anchor="start">.inbox/</text><text x="690" y="748" class="nms" text-anchor="start">자동 수집 설정</text><text x="636" y="772" class="sb" text-anchor="start">카톡이나 메일을 연결했을 때만 생겨요</text><line x1="40" y1="846" x2="1160" y2="846" class="hair"/><text x="40" y="864" class="keyb" text-anchor="start">읽는 법</text><rect x="95.6" y="854" width="16" height="12" rx="2" class="bx"/><text x="117.6" y="864" class="sb" text-anchor="start">AI가 쓰거나 고치는 파일</text><rect x="267.6" y="854" width="16" height="12" rx="2" class="bxst"/><text x="289.6" y="864" class="sb" text-anchor="start">원본을 그대로 두는 창고</text><rect x="437.5" y="854" width="16" height="12" rx="2" class="bxop"/><text x="459.5" y="864" class="sb" text-anchor="start">연결했을 때만 생기는 것</text><rect x="607.4" y="854" width="16" height="12" rx="2" class="bxfc"/><text x="629.4" y="864" class="sb" text-anchor="start">설치 절차가 적힌 곳</text></svg></div><figcaption>링크 한 줄로 깔리는 것. 왼쪽이 깃허브 저장소, 오른쪽이 설치가 끝난 뒤 내 컴퓨터 모습이에요. 위키 폴더는 이름을 직접 정하시면 됩니다.</figcaption></figure>
+  <p>깔리는 건 프로그램이 아니라 <b>규칙 모음</b>이에요. <b>위키 본체는</b> 켜 두고 도는 것도, 인터넷도 없어요. 파일을 받아오는 설치 때만 씁니다. 카톡·메일을 연결하시면 그때만 밤에 가져오기가 돌고 인터넷을 써요.</p>
+  <p>스킬은 내 사용자 폴더 밑에 깔리기 때문에 <b>어느 폴더에서 작업하든 따라와요.</b> 실습 폴더를 옮기거나 이름을 바꿔도 그대로 쓰입니다.</p>
+  <p class="note">카톡이나 메일을 연결하실 때만 파이썬이 있어야 해요. 그것도 파이썬에 처음부터 들어 있는 기능만 써서, 따로 받을 건 없습니다. 위키 본체는 파이썬 없이도 돌아가요.</p>
+</section>
+
+<section id="factory">
+  <h2><span class="num">02</span>어떻게 도나</h2>
+  <p class="lede">입구는 둘인데 문은 하나예요. 카톡·메일로 들어오든 손으로 넣으시든, 판정도 페이지 모양도 똑같습니다.</p>
+  <figure><p class="fig-hint">그림이 잘려 보이면 옆으로 밀어 보세요</p><div class="fig-box"><svg id="g2" viewBox="0 0 1200 780" role="img" aria-labelledby="g2-title g2-desc" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block"><title id="g2-title">입구는 둘, 문은 하나인 위키 공장</title><desc id="g2-desc">카톡과 메일과 손으로 넣은 자료가 원본 창고로 모이고, 판정을 거쳐 위키 페이지가 되고, 물어보면 답이 나오고 좋은 답이 다시 페이지가 되며, 그 모든 자료가 바닥의 장부에 한 줄씩 남는 흐름도예요.</desc><defs><style>#g2{--paper:#fafaf8;--paper2:#f5f3ed;--ink:#1a1a1a;--muted:#6b6b6b;--soft:#858585;--rule:rgba(26,26,26,0.12);--rule2:#b5b5b5;--accent:#c9422b;--acct:rgba(201,66,43,0.08);--link:#2b4f8c;--hl:#fff066;--boxbg:#ffffff;--stbg:rgba(26,26,26,0.05);--exbg:rgba(26,26,26,0.03);--exline:rgba(26,26,26,0.30);--inbg:rgba(107,107,107,0.10);--opbg:rgba(26,26,26,0.02);--opline:rgba(26,26,26,0.22);--zone:rgba(26,26,26,0.02);--zoneline:rgba(26,26,26,0.10);}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) #g2{--paper:#1e1e1e;--paper2:#2a2a2a;--ink:#e8e4dc;--muted:#a0a0a0;--soft:#7d7d7d;--rule:rgba(232,228,220,0.12);--rule2:#3a3a3a;--accent:#e05a3a;--acct:rgba(224,90,58,0.14);--link:#7fa3d4;--hl:#fff066;--boxbg:#262626;--stbg:rgba(232,228,220,0.07);--exbg:rgba(232,228,220,0.04);--exline:rgba(232,228,220,0.32);--inbg:rgba(160,160,160,0.14);--opbg:rgba(232,228,220,0.03);--opline:rgba(232,228,220,0.24);--zone:rgba(232,228,220,0.03);--zoneline:rgba(232,228,220,0.11);}}
+:root[data-theme="dark"] #g2{--paper:#1e1e1e;--paper2:#2a2a2a;--ink:#e8e4dc;--muted:#a0a0a0;--soft:#7d7d7d;--rule:rgba(232,228,220,0.12);--rule2:#3a3a3a;--accent:#e05a3a;--acct:rgba(224,90,58,0.14);--link:#7fa3d4;--hl:#fff066;--boxbg:#262626;--stbg:rgba(232,228,220,0.07);--exbg:rgba(232,228,220,0.04);--exline:rgba(232,228,220,0.32);--inbg:rgba(160,160,160,0.14);--opbg:rgba(232,228,220,0.03);--opline:rgba(232,228,220,0.24);--zone:rgba(232,228,220,0.03);--zoneline:rgba(232,228,220,0.11);}
+:root[data-theme="light"] #g2{--paper:#fafaf8;--paper2:#f5f3ed;--ink:#1a1a1a;--muted:#6b6b6b;--soft:#858585;--rule:rgba(26,26,26,0.12);--rule2:#b5b5b5;--accent:#c9422b;--acct:rgba(201,66,43,0.08);--link:#2b4f8c;--hl:#fff066;--boxbg:#ffffff;--stbg:rgba(26,26,26,0.05);--exbg:rgba(26,26,26,0.03);--exline:rgba(26,26,26,0.30);--inbg:rgba(107,107,107,0.10);--opbg:rgba(26,26,26,0.02);--opline:rgba(26,26,26,0.22);--zone:rgba(26,26,26,0.02);--zoneline:rgba(26,26,26,0.10);}
+
+#g2 .pg{fill:var(--paper)}
+#g2 .ttl{font-family:'Gaegu','Nanum Pen Script','Pretendard','Noto Sans KR',cursive;font-size:30px;font-weight:700;fill:var(--ink)}
+#g2 .sttl{font-family:'Pretendard','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:13px;fill:var(--muted)}
+#g2 .eyb{font-family:'Geist Mono','SFMono-Regular',ui-monospace,'Menlo',monospace;font-size:8px;letter-spacing:0.18em;fill:var(--soft)}
+#g2 .keyb{font-family:'Pretendard','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:11px;font-weight:600;fill:var(--soft)}
+#g2 .nm{font-family:'Pretendard','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:13px;font-weight:600;fill:var(--ink)}
+#g2 .nms{font-family:'Pretendard','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:11.5px;font-weight:600;fill:var(--ink)}
+#g2 .sb{font-family:'Pretendard','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:10.5px;fill:var(--muted)}
+#g2 .sbs{font-family:'Pretendard','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:9.5px;fill:var(--soft)}
+#g2 .mn{font-family:'Geist Mono','SFMono-Regular',ui-monospace,'Menlo',monospace;font-size:9px;fill:var(--muted)}
+#g2 .mnb{font-family:'Geist Mono','SFMono-Regular',ui-monospace,'Menlo',monospace;font-size:10.5px;font-weight:500;fill:var(--ink)}
+#g2 .al{font-family:'Pretendard','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:12px;font-weight:500;fill:var(--muted)}
+#g2 .cal{font-family:'Gaegu','Nanum Pen Script','Pretendard','Noto Sans KR',cursive;font-size:17px;fill:var(--ink)}
+#g2 .acc{fill:var(--accent)}
+#g2 .bx{fill:var(--boxbg);stroke:var(--ink);stroke-width:1}
+#g2 .bxst{fill:var(--stbg);stroke:var(--muted);stroke-width:1}
+#g2 .bxin{fill:var(--inbg);stroke:var(--soft);stroke-width:1}
+#g2 .bxop{fill:var(--opbg);stroke:var(--opline);stroke-width:1;stroke-dasharray:4 3}
+#g2 .bxfc{fill:var(--acct);stroke:var(--accent);stroke-width:1.2}
+#g2 .chip{fill:var(--boxbg);stroke:var(--rule2);stroke-width:0.8}
+#g2 .zn{fill:var(--zone);stroke:var(--zoneline);stroke-width:0.8}
+#g2 .msk{fill:var(--paper)}
+#g2 .ln{fill:none;stroke:var(--muted);stroke-width:1.2}
+#g2 .lnd{fill:none;stroke:var(--muted);stroke-width:1;stroke-dasharray:4 3}
+#g2 .hair{stroke:var(--rule);stroke-width:0.8;fill:none}
+#g2 .hair2{stroke:var(--rule2);stroke-width:0.8;fill:none}
+#g2 .tagb{fill:none;stroke:var(--muted);stroke-width:0.8}
+#g2 .taga{fill:var(--acct);stroke:var(--accent);stroke-width:0.8}
+#g2 .mk{fill:var(--muted)}
+#g2 .mka{fill:var(--accent)}
+#g2 .hl{fill:var(--hl)}
+</style><marker id="g2-ar" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon class="mk" points="0 0, 8 3, 0 6"/></marker><marker id="g2-ara" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon class="mka" points="0 0, 8 3, 0 6"/></marker></defs><rect width="100%" height="100%" class="pg"/><text x="40" y="36" class="eyb" text-anchor="start">FLOW · 공장 네 칸과 바닥 장부</text><text x="40" y="74" class="ttl" text-anchor="start">입구는 둘, 문은 하나</text><text x="40" y="100" class="sttl" text-anchor="start">어디로 들어오든 판정도 페이지 모양도 똑같아요</text><rect x="40" y="142" width="16" height="12" rx="2" class="bxin"/><text x="62" y="152" class="keyb" text-anchor="start">llm-wiki-inbox가 가져와요</text><rect x="620" y="142" width="16" height="12" rx="2" class="bx"/><text x="642" y="152" class="keyb" text-anchor="start">llm-wiki-factory가 정리해요</text><path d="M 260,224 H 292 Q 300,224 300,232 V 232 Q 300,240 308,240 H 340" class="ln" marker-end="url(#g2-ar)"/><path d="M 260,292 H 292 Q 300,292 300,284 V 284 Q 300,276 308,276 H 340" class="ln" marker-end="url(#g2-ar)"/><path d="M 540,258 L 620,258" class="ln" marker-end="url(#g2-ar)"/><rect x="553.8" y="234" width="52.4" height="16" rx="2" class="msk"/><text x="580" y="246" class="al" text-anchor="middle">20건씩</text><path d="M 820,258 L 900,258" class="ln" marker-end="url(#g2-ar)"/><rect x="835.0" y="234" width="50.0" height="16" rx="2" class="msk"/><text x="860" y="246" class="al" text-anchor="middle">올림만</text><path d="M 980,320 L 980,420" class="ln" marker-end="url(#g2-ar)"/><rect x="910.0" y="362" width="62.0" height="16" rx="2" class="msk"/><text x="965" y="374" class="al" text-anchor="end">물어보면</text><path d="M 1060,420 L 1060,320" class="lnd" marker-end="url(#g2-ar)"/><rect x="1068" y="362" width="93.2" height="16" rx="2" class="msk"/><text x="1075" y="374" class="al" text-anchor="start">답을 페이지로</text><path d="M 440,320 L 440,560" class="lnd" marker-end="url(#g2-ar)"/><rect x="448" y="432" width="81.2" height="16" rx="2" class="msk"/><text x="455" y="444" class="al" text-anchor="start">먼저 대기로</text><path d="M 720,320 L 720,560" class="lnd" marker-end="url(#g2-ar)"/><rect x="728" y="432" width="81.2" height="16" rx="2" class="msk"/><text x="735" y="444" class="al" text-anchor="start">최종 상태로</text><rect x="40" y="196" width="220" height="56" rx="6" class="msk"/><rect x="40" y="196" width="220" height="56" rx="6" class="bxin"/><text x="56" y="220" class="nms" text-anchor="start">카톡 · 메일</text><text x="56" y="238" class="sbs" text-anchor="start">밤마다 자동으로 들어와요</text><rect x="40" y="264" width="220" height="56" rx="6" class="msk"/><rect x="40" y="264" width="220" height="56" rx="6" class="bxin"/><text x="56" y="288" class="nms" text-anchor="start">손으로 넣기</text><text x="56" y="306" class="sbs" text-anchor="start">파일을 창고에 끌어다 놓아요</text><rect x="340" y="196" width="200" height="124" rx="6" class="msk"/><rect x="340" y="196" width="200" height="124" rx="6" class="bxst"/><text x="356" y="226" class="mnb" text-anchor="start">raw/</text><text x="356" y="250" class="nms" text-anchor="start">원본 창고</text><text x="356" y="274" class="sb" text-anchor="start">원본은 안 고쳐요</text><text x="356" y="294" class="sb" text-anchor="start">이름도 그대로 둬요</text><rect x="620" y="196" width="200" height="124" rx="6" class="msk"/><rect x="620" y="196" width="200" height="124" rx="6" class="bxfc"/><text x="636" y="226" class="nm" text-anchor="start">판정</text><text x="636" y="252" class="sb" text-anchor="start">올림 · 다시 찾아볼 사실</text><text x="636" y="274" class="sb" text-anchor="start">버림 · 광고와 중복</text><text x="636" y="296" class="sb" text-anchor="start">보류 · 본인만 아는 것</text><rect x="900" y="196" width="240" height="124" rx="6" class="msk"/><rect x="900" y="196" width="240" height="124" rx="6" class="bx"/><text x="916" y="226" class="mnb" text-anchor="start">wiki/</text><text x="916" y="250" class="nms" text-anchor="start">정리된 위키</text><text x="916" y="274" class="sb" text-anchor="start">페이지 + 목차 + 기록</text><text x="916" y="294" class="sb" text-anchor="start">옵시디언으로도 열려요</text><rect x="900" y="420" width="240" height="100" rx="6" class="msk"/><rect x="900" y="420" width="240" height="100" rx="6" class="bx"/><text x="916" y="450" class="nm" text-anchor="start">위키에서 찾아줘</text><text x="916" y="474" class="sb" text-anchor="start">목차를 먼저 읽어요</text><text x="916" y="496" class="sb" text-anchor="start">답에 [[출처]]를 붙여요</text><rect x="40" y="560" width="1120" height="104" rx="8" class="msk"/><rect x="40" y="560" width="1120" height="104" rx="8" class="bxst"/><text x="60" y="586" class="keyb" text-anchor="start">바닥 장부 · wiki/장부.md</text><text x="60" y="612" class="nms" text-anchor="start">자료 1건이 한 줄이에요</text><text x="60" y="634" class="sbs" text-anchor="start">위키에 안 올린 것도 남아요</text><rect x="420" y="580" width="164" height="56" rx="4" class="chip"/><text x="434" y="604" class="nms" text-anchor="start">대기</text><text x="434" y="624" class="sbs" text-anchor="start">아직 판정 전이에요</text><rect x="600" y="580" width="164" height="56" rx="4" class="chip"/><text x="614" y="604" class="nms" text-anchor="start">올림</text><text x="614" y="624" class="sbs" text-anchor="start">페이지가 생겼어요</text><rect x="780" y="580" width="164" height="56" rx="4" class="chip"/><text x="794" y="604" class="nms" text-anchor="start">버림</text><text x="794" y="624" class="sbs" text-anchor="start">이유를 꼭 적어요</text><rect x="960" y="580" width="164" height="56" rx="4" class="chip"/><text x="974" y="604" class="nms" text-anchor="start">보류</text><text x="974" y="624" class="sbs" text-anchor="start">물어볼 게 있어요</text><rect x="56" y="695" width="212.2" height="8" rx="0" class="hl"/><text x="60" y="704" class="cal" text-anchor="start">밤에 도는 건 가져오기뿐이에요. 판정은 아침에 한 마디 하실 때만 해요.</text><line x1="40" y1="736" x2="1160" y2="736" class="hair"/><text x="40" y="754" class="keyb" text-anchor="start">읽는 법</text><rect x="95.6" y="744" width="16" height="12" rx="2" class="bxin"/><text x="117.6" y="754" class="sb" text-anchor="start">llm-wiki-inbox가 맡아요</text><rect x="278.1" y="744" width="16" height="12" rx="2" class="bx"/><text x="300.1" y="754" class="sb" text-anchor="start">llm-wiki-factory가 맡아요</text><rect x="473.2" y="744" width="16" height="12" rx="2" class="bxst"/><text x="495.2" y="754" class="sb" text-anchor="start">두 스킬이 같이 쓰는 창고</text><rect x="649.4" y="744" width="16" height="12" rx="2" class="bxfc"/><text x="671.4" y="754" class="sb" text-anchor="start">오늘 이야기의 중심</text></svg></div><figcaption>자료가 들어와서 페이지가 되기까지. 입구가 둘이어도 판정 칸은 하나예요. 들어온 자료는 빠짐없이 바닥 장부에 한 줄씩 남습니다.</figcaption></figure>
+  <h3>자료 한 건이 지나가는 길</h3>
+  <p>예를 들어 회의록 파일 하나를 <code>raw/</code>에 넣고 <b>"위키에 넣어줘"</b>라고 하시면 이렇게 됩니다.</p>
+  <ol class="steps">
+    <li><b>장부에 먼저 <code>대기</code>로 적혀요</b><span class="t">판정하기 전에 적어요. 여기서 멈춰도 자료가 안 없어져요</span></li>
+    <li><b>파일을 읽고 올림으로 정해요</b><span class="t">결정과 금액과 날짜가 있으니 다시 찾아볼 자료예요</span></li>
+    <li><b>페이지가 생기고 목차에 한 줄이 늘어요</b><span class="t">페이지 맨 아래에는 원본이 어디 있는지 경로가 붙어요</span></li>
+    <li><b>같이 있던 이전 버전은 버림으로 남아요</b><span class="t">이유 칸에 대표 파일 이름을 적어 둬서 나중에 왜 뺐는지 알 수 있어요</span></li>
+  </ol>
+  <div class="callout">
+    <p><b>버림은 삭제가 아니에요.</b> 원본은 창고에 그대로 있고, 장부에 왜 안 올렸는지가 남습니다. 나중에 "이거 왜 없지"가 아니라 "아, 중복이라 뺐구나"가 돼요.</p>
+  </div>
+</section>
+
+<section id="tracks">
+  <h2><span class="num">03</span>예전 것과 새 것</h2>
+  <p class="lede">예전 것은 한 번에 받아 두고 회차마다 스무 건씩 줄여요. 새로 오는 것은 마지막으로 본 시각 이후만 가져옵니다.</p>
+  <figure><p class="fig-hint">그림이 잘려 보이면 옆으로 밀어 보세요</p><div class="fig-box"><svg id="g3" viewBox="0 0 1200 620" role="img" aria-labelledby="g3-title g3-desc" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block"><title id="g3-title">예전 것과 새로 오는 것, 두 트랙</title><desc id="g3-desc">위 줄은 처음 연결할 때 받아 둔 6개월치 140건이 회차마다 스무 건씩 줄어드는 막대이고, 아래 줄은 마지막으로 본 시각 이후만 한 시간씩 겹쳐 가져오는 실시간 수집이며, 오른쪽에 현황을 알려 주는 문장 예시가 있어요.</desc><defs><style>#g3{--paper:#fafaf8;--paper2:#f5f3ed;--ink:#1a1a1a;--muted:#6b6b6b;--soft:#858585;--rule:rgba(26,26,26,0.12);--rule2:#b5b5b5;--accent:#c9422b;--acct:rgba(201,66,43,0.08);--link:#2b4f8c;--hl:#fff066;--boxbg:#ffffff;--stbg:rgba(26,26,26,0.05);--exbg:rgba(26,26,26,0.03);--exline:rgba(26,26,26,0.30);--inbg:rgba(107,107,107,0.10);--opbg:rgba(26,26,26,0.02);--opline:rgba(26,26,26,0.22);--zone:rgba(26,26,26,0.02);--zoneline:rgba(26,26,26,0.10);}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) #g3{--paper:#1e1e1e;--paper2:#2a2a2a;--ink:#e8e4dc;--muted:#a0a0a0;--soft:#7d7d7d;--rule:rgba(232,228,220,0.12);--rule2:#3a3a3a;--accent:#e05a3a;--acct:rgba(224,90,58,0.14);--link:#7fa3d4;--hl:#fff066;--boxbg:#262626;--stbg:rgba(232,228,220,0.07);--exbg:rgba(232,228,220,0.04);--exline:rgba(232,228,220,0.32);--inbg:rgba(160,160,160,0.14);--opbg:rgba(232,228,220,0.03);--opline:rgba(232,228,220,0.24);--zone:rgba(232,228,220,0.03);--zoneline:rgba(232,228,220,0.11);}}
+:root[data-theme="dark"] #g3{--paper:#1e1e1e;--paper2:#2a2a2a;--ink:#e8e4dc;--muted:#a0a0a0;--soft:#7d7d7d;--rule:rgba(232,228,220,0.12);--rule2:#3a3a3a;--accent:#e05a3a;--acct:rgba(224,90,58,0.14);--link:#7fa3d4;--hl:#fff066;--boxbg:#262626;--stbg:rgba(232,228,220,0.07);--exbg:rgba(232,228,220,0.04);--exline:rgba(232,228,220,0.32);--inbg:rgba(160,160,160,0.14);--opbg:rgba(232,228,220,0.03);--opline:rgba(232,228,220,0.24);--zone:rgba(232,228,220,0.03);--zoneline:rgba(232,228,220,0.11);}
+:root[data-theme="light"] #g3{--paper:#fafaf8;--paper2:#f5f3ed;--ink:#1a1a1a;--muted:#6b6b6b;--soft:#858585;--rule:rgba(26,26,26,0.12);--rule2:#b5b5b5;--accent:#c9422b;--acct:rgba(201,66,43,0.08);--link:#2b4f8c;--hl:#fff066;--boxbg:#ffffff;--stbg:rgba(26,26,26,0.05);--exbg:rgba(26,26,26,0.03);--exline:rgba(26,26,26,0.30);--inbg:rgba(107,107,107,0.10);--opbg:rgba(26,26,26,0.02);--opline:rgba(26,26,26,0.22);--zone:rgba(26,26,26,0.02);--zoneline:rgba(26,26,26,0.10);}
+
+#g3 .pg{fill:var(--paper)}
+#g3 .ttl{font-family:'Gaegu','Nanum Pen Script','Pretendard','Noto Sans KR',cursive;font-size:30px;font-weight:700;fill:var(--ink)}
+#g3 .sttl{font-family:'Pretendard','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:13px;fill:var(--muted)}
+#g3 .eyb{font-family:'Geist Mono','SFMono-Regular',ui-monospace,'Menlo',monospace;font-size:8px;letter-spacing:0.18em;fill:var(--soft)}
+#g3 .keyb{font-family:'Pretendard','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:11px;font-weight:600;fill:var(--soft)}
+#g3 .nm{font-family:'Pretendard','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:13px;font-weight:600;fill:var(--ink)}
+#g3 .nms{font-family:'Pretendard','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:11.5px;font-weight:600;fill:var(--ink)}
+#g3 .sb{font-family:'Pretendard','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:10.5px;fill:var(--muted)}
+#g3 .sbs{font-family:'Pretendard','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:9.5px;fill:var(--soft)}
+#g3 .mn{font-family:'Geist Mono','SFMono-Regular',ui-monospace,'Menlo',monospace;font-size:9px;fill:var(--muted)}
+#g3 .mnb{font-family:'Geist Mono','SFMono-Regular',ui-monospace,'Menlo',monospace;font-size:10.5px;font-weight:500;fill:var(--ink)}
+#g3 .al{font-family:'Pretendard','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:12px;font-weight:500;fill:var(--muted)}
+#g3 .cal{font-family:'Gaegu','Nanum Pen Script','Pretendard','Noto Sans KR',cursive;font-size:17px;fill:var(--ink)}
+#g3 .acc{fill:var(--accent)}
+#g3 .bx{fill:var(--boxbg);stroke:var(--ink);stroke-width:1}
+#g3 .bxst{fill:var(--stbg);stroke:var(--muted);stroke-width:1}
+#g3 .bxin{fill:var(--inbg);stroke:var(--soft);stroke-width:1}
+#g3 .bxop{fill:var(--opbg);stroke:var(--opline);stroke-width:1;stroke-dasharray:4 3}
+#g3 .bxfc{fill:var(--acct);stroke:var(--accent);stroke-width:1.2}
+#g3 .chip{fill:var(--boxbg);stroke:var(--rule2);stroke-width:0.8}
+#g3 .zn{fill:var(--zone);stroke:var(--zoneline);stroke-width:0.8}
+#g3 .msk{fill:var(--paper)}
+#g3 .ln{fill:none;stroke:var(--muted);stroke-width:1.2}
+#g3 .lnd{fill:none;stroke:var(--muted);stroke-width:1;stroke-dasharray:4 3}
+#g3 .hair{stroke:var(--rule);stroke-width:0.8;fill:none}
+#g3 .hair2{stroke:var(--rule2);stroke-width:0.8;fill:none}
+#g3 .tagb{fill:none;stroke:var(--muted);stroke-width:0.8}
+#g3 .taga{fill:var(--acct);stroke:var(--accent);stroke-width:0.8}
+#g3 .mk{fill:var(--muted)}
+#g3 .mka{fill:var(--accent)}
+#g3 .hl{fill:var(--hl)}
+</style><marker id="g3-ar" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon class="mk" points="0 0, 8 3, 0 6"/></marker><marker id="g3-ara" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon class="mka" points="0 0, 8 3, 0 6"/></marker></defs><rect width="100%" height="100%" class="pg"/><text x="40" y="36" class="eyb" text-anchor="start">TIMELINE · 두 트랙</text><text x="40" y="74" class="ttl" text-anchor="start">예전 것과 새로 오는 것은 따로 돌아요</text><text x="40" y="100" class="sttl" text-anchor="start">한 번에 다 하지 않아요. 예전 것은 회차마다 스무 건씩 줄어들어요</text><text x="40" y="150" class="keyb" text-anchor="start">위 줄 · 예전 것(밀린 것)</text><line x1="120" y1="300" x2="860" y2="300" class="hair2"/><rect x="140" y="188" width="72" height="112" rx="4" class="msk"/><rect x="140" y="188" width="72" height="112" rx="4" class="bxfc"/><text x="176" y="180" class="mn" text-anchor="middle">140</text><text x="176" y="318" class="sbs" text-anchor="middle">1회차</text><rect x="240" y="204" width="72" height="96" rx="4" class="msk"/><rect x="240" y="204" width="72" height="96" rx="4" class="bxst"/><text x="276" y="196" class="mn" text-anchor="middle">120</text><text x="276" y="318" class="sbs" text-anchor="middle">2회차</text><rect x="340" y="220" width="72" height="80" rx="4" class="msk"/><rect x="340" y="220" width="72" height="80" rx="4" class="bxst"/><text x="376" y="212" class="mn" text-anchor="middle">100</text><text x="376" y="318" class="sbs" text-anchor="middle">3회차</text><rect x="440" y="236" width="72" height="64" rx="4" class="msk"/><rect x="440" y="236" width="72" height="64" rx="4" class="bxst"/><text x="476" y="228" class="mn" text-anchor="middle">80</text><text x="476" y="318" class="sbs" text-anchor="middle">4회차</text><rect x="540" y="252" width="72" height="48" rx="4" class="msk"/><rect x="540" y="252" width="72" height="48" rx="4" class="bxst"/><text x="576" y="244" class="mn" text-anchor="middle">60</text><text x="576" y="318" class="sbs" text-anchor="middle">5회차</text><rect x="640" y="268" width="72" height="32" rx="4" class="msk"/><rect x="640" y="268" width="72" height="32" rx="4" class="bxst"/><text x="676" y="260" class="mn" text-anchor="middle">40</text><text x="676" y="318" class="sbs" text-anchor="middle">6회차</text><rect x="740" y="284" width="72" height="16" rx="4" class="msk"/><rect x="740" y="284" width="72" height="16" rx="4" class="bxst"/><text x="776" y="276" class="mn" text-anchor="middle">20</text><text x="776" y="318" class="sbs" text-anchor="middle">7회차</text><text x="840" y="300" class="mn" text-anchor="start">0</text><text x="140" y="346" class="sb" text-anchor="start">처음 연결할 때 고른 범위를 한꺼번에 받아 둬요. 여기서는 6개월치 140건이에요.</text><line x1="40" y1="374" x2="860" y2="374" class="hair"/><text x="40" y="406" class="keyb" text-anchor="start">아래 줄 · 새로 오는 것(실시간)</text><rect x="140" y="432" width="660" height="36" rx="6" class="msk"/><rect x="140" y="432" width="660" height="36" rx="6" class="bx"/><line x1="360" y1="432" x2="360" y2="468" class="hair2"/><line x1="580" y1="432" x2="580" y2="468" class="hair2"/><rect x="344" y="436" width="32" height="28" rx="2" class="hl"/><rect x="564" y="436" width="32" height="28" rx="2" class="hl"/><text x="250" y="456" class="nms" text-anchor="middle">9월 17일 밤</text><text x="470" y="456" class="nms" text-anchor="middle">9월 18일 밤</text><text x="690" y="456" class="nms" text-anchor="middle">9월 19일 밤</text><text x="140" y="492" class="sb" text-anchor="start">마지막으로 본 시각 이후만 가져와요.</text><text x="140" y="512" class="sb" text-anchor="start">이어지는 자리마다 한 시간을 겹쳐서 봐요. 그래야 그사이에 온 것을 안 놓쳐요.</text><rect x="880" y="180" width="280" height="264" rx="8" class="msk"/><rect x="880" y="180" width="280" height="264" rx="8" class="bx"/><text x="896" y="208" class="keyb" text-anchor="start">현황은 이렇게 알려 드려요</text><line x1="896" y1="222" x2="1144" y2="222" class="hair"/><text x="896" y="254" class="nm" text-anchor="start">새로 온 것 3건</text><text x="896" y="274" class="sb" text-anchor="start">어젯밤에 들어온 것이에요</text><text x="896" y="310" class="nm" text-anchor="start">밀린 것 140건 중 20건</text><text x="896" y="330" class="sb" text-anchor="start">이번 회차에 할 수 있는 양이에요</text><text x="896" y="366" class="nm" text-anchor="start">6개월 중 3개월치</text><text x="896" y="386" class="sb" text-anchor="start">예전 것을 여기까지 받아 뒀어요</text><text x="896" y="424" class="sbs" text-anchor="start">숫자는 어림하지 않고 세서 말해요</text><line x1="40" y1="552" x2="1160" y2="552" class="hair"/><text x="40" y="570" class="keyb" text-anchor="start">읽는 법</text><rect x="95.6" y="560" width="16" height="12" rx="2" class="bxfc"/><text x="117.6" y="570" class="sb" text-anchor="start">이번 회차에 할 몫</text><rect x="234.0" y="560" width="16" height="12" rx="2" class="bxst"/><text x="256.0" y="570" class="sb" text-anchor="start">아직 남은 밀린 것</text><rect x="372.4" y="560" width="16" height="12" rx="2" class="hl"/><text x="394.4" y="570" class="sb" text-anchor="start">겹쳐서 보는 한 시간</text></svg></div><figcaption>두 트랙. 위 줄은 처음에 받아 둔 예전 것이 회차마다 줄어드는 모습이고, 아래 줄은 새로 오는 것을 한 시간씩 겹쳐 가져오는 모습이에요. 한 회차 스무 칸은 새로 온 것이 먼저 채우기 때문에, 새 자료가 있는 날은 밀린 것이 스무 개보다 덜 줄어요.</figcaption></figure>
+  <p>처음 연결하실 때 "1년치"를 고르셔도 놀라지 않으셔도 돼요. <b>받아만 두고 한꺼번에 처리하지 않아요.</b> 한 회차에 스무 건씩만 판정하기 때문에 첫날부터 며칠이 걸리지 않습니다.</p>
+  <p>새로 오는 것은 마지막으로 본 시각 이후만 봅니다. 이어지는 자리마다 <span class="hl-mark">한 시간을 겹쳐서</span> 보기 때문에, 그사이에 도착한 메일이 사이로 빠지지 않아요.</p>
+  <p class="note">현황을 물어보시면 새로 온 것과 밀린 것을 갈라서 알려 드려요. 이 숫자는 어림하지 않고 창고를 실제로 세서 말합니다.</p>
+</section>
+
+<section id="routine">
+  <h2><span class="num">04</span>하루 루틴</h2>
+  <p class="lede">밤에는 가져오기만 하고, 판단은 아침에 한 마디 하실 때만 해요. 그래서 자는 사이에 위키가 바뀌지 않습니다.</p>
+  <figure><p class="fig-hint">그림이 잘려 보이면 옆으로 밀어 보세요</p><div class="fig-box"><svg id="g4" viewBox="0 0 1200 700" role="img" aria-labelledby="g4-title g4-desc" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block"><title id="g4-title">하루 루틴: 첫날 한 번 둘러보고, 그다음부터 밤에는 가져오기만, 아침에 한 마디</title><desc id="g4-desc">맨 위 띠는 첫날 한 번만 하는 둘러보기예요. 메일과 카톡의 겉만 세어 표로 보여드리고, 메일 본문은 받지 않고 카톡 대화는 몇 줄인지만 세요. 그 아래가 하루 순서도예요. 밤 열한 시에 작업 스케줄러가 자료를 가져오기만 하고, 아침에 밀린 거 처리해달라고 한 마디 하면 스무 건을 판정하고, 낮에는 위키에서 찾고, 주에 한 번쯤 점검해요. 컴퓨터가 꺼져 있으면 밤 수집은 건너뛴다는 주의도 함께 적혀 있어요.</desc><defs><style>#g4{--paper:#fafaf8;--paper2:#f5f3ed;--ink:#1a1a1a;--muted:#6b6b6b;--soft:#858585;--rule:rgba(26,26,26,0.12);--rule2:#b5b5b5;--accent:#c9422b;--acct:rgba(201,66,43,0.08);--link:#2b4f8c;--hl:#fff066;--boxbg:#ffffff;--stbg:rgba(26,26,26,0.05);--exbg:rgba(26,26,26,0.03);--exline:rgba(26,26,26,0.30);--inbg:rgba(107,107,107,0.10);--opbg:rgba(26,26,26,0.02);--opline:rgba(26,26,26,0.22);--zone:rgba(26,26,26,0.02);--zoneline:rgba(26,26,26,0.10);}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) #g4{--paper:#1e1e1e;--paper2:#2a2a2a;--ink:#e8e4dc;--muted:#a0a0a0;--soft:#7d7d7d;--rule:rgba(232,228,220,0.12);--rule2:#3a3a3a;--accent:#e05a3a;--acct:rgba(224,90,58,0.14);--link:#7fa3d4;--hl:#fff066;--boxbg:#262626;--stbg:rgba(232,228,220,0.07);--exbg:rgba(232,228,220,0.04);--exline:rgba(232,228,220,0.32);--inbg:rgba(160,160,160,0.14);--opbg:rgba(232,228,220,0.03);--opline:rgba(232,228,220,0.24);--zone:rgba(232,228,220,0.03);--zoneline:rgba(232,228,220,0.11);}}
+:root[data-theme="dark"] #g4{--paper:#1e1e1e;--paper2:#2a2a2a;--ink:#e8e4dc;--muted:#a0a0a0;--soft:#7d7d7d;--rule:rgba(232,228,220,0.12);--rule2:#3a3a3a;--accent:#e05a3a;--acct:rgba(224,90,58,0.14);--link:#7fa3d4;--hl:#fff066;--boxbg:#262626;--stbg:rgba(232,228,220,0.07);--exbg:rgba(232,228,220,0.04);--exline:rgba(232,228,220,0.32);--inbg:rgba(160,160,160,0.14);--opbg:rgba(232,228,220,0.03);--opline:rgba(232,228,220,0.24);--zone:rgba(232,228,220,0.03);--zoneline:rgba(232,228,220,0.11);}
+:root[data-theme="light"] #g4{--paper:#fafaf8;--paper2:#f5f3ed;--ink:#1a1a1a;--muted:#6b6b6b;--soft:#858585;--rule:rgba(26,26,26,0.12);--rule2:#b5b5b5;--accent:#c9422b;--acct:rgba(201,66,43,0.08);--link:#2b4f8c;--hl:#fff066;--boxbg:#ffffff;--stbg:rgba(26,26,26,0.05);--exbg:rgba(26,26,26,0.03);--exline:rgba(26,26,26,0.30);--inbg:rgba(107,107,107,0.10);--opbg:rgba(26,26,26,0.02);--opline:rgba(26,26,26,0.22);--zone:rgba(26,26,26,0.02);--zoneline:rgba(26,26,26,0.10);}
+
+#g4 .pg{fill:var(--paper)}
+#g4 .ttl{font-family:'Gaegu','Nanum Pen Script','Pretendard','Noto Sans KR',cursive;font-size:30px;font-weight:700;fill:var(--ink)}
+#g4 .sttl{font-family:'Pretendard','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:13px;fill:var(--muted)}
+#g4 .eyb{font-family:'Geist Mono','SFMono-Regular',ui-monospace,'Menlo',monospace;font-size:8px;letter-spacing:0.18em;fill:var(--soft)}
+#g4 .keyb{font-family:'Pretendard','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:11px;font-weight:600;fill:var(--soft)}
+#g4 .nm{font-family:'Pretendard','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:13px;font-weight:600;fill:var(--ink)}
+#g4 .nms{font-family:'Pretendard','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:11.5px;font-weight:600;fill:var(--ink)}
+#g4 .sb{font-family:'Pretendard','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:10.5px;fill:var(--muted)}
+#g4 .sbs{font-family:'Pretendard','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:9.5px;fill:var(--soft)}
+#g4 .mn{font-family:'Geist Mono','SFMono-Regular',ui-monospace,'Menlo',monospace;font-size:9px;fill:var(--muted)}
+#g4 .mnb{font-family:'Geist Mono','SFMono-Regular',ui-monospace,'Menlo',monospace;font-size:10.5px;font-weight:500;fill:var(--ink)}
+#g4 .al{font-family:'Pretendard','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:12px;font-weight:500;fill:var(--muted)}
+#g4 .cal{font-family:'Gaegu','Nanum Pen Script','Pretendard','Noto Sans KR',cursive;font-size:17px;fill:var(--ink)}
+#g4 .acc{fill:var(--accent)}
+#g4 .bx{fill:var(--boxbg);stroke:var(--ink);stroke-width:1}
+#g4 .bxst{fill:var(--stbg);stroke:var(--muted);stroke-width:1}
+#g4 .bxin{fill:var(--inbg);stroke:var(--soft);stroke-width:1}
+#g4 .bxop{fill:var(--opbg);stroke:var(--opline);stroke-width:1;stroke-dasharray:4 3}
+#g4 .bxfc{fill:var(--acct);stroke:var(--accent);stroke-width:1.2}
+#g4 .chip{fill:var(--boxbg);stroke:var(--rule2);stroke-width:0.8}
+#g4 .zn{fill:var(--zone);stroke:var(--zoneline);stroke-width:0.8}
+#g4 .msk{fill:var(--paper)}
+#g4 .ln{fill:none;stroke:var(--muted);stroke-width:1.2}
+#g4 .lnd{fill:none;stroke:var(--muted);stroke-width:1;stroke-dasharray:4 3}
+#g4 .hair{stroke:var(--rule);stroke-width:0.8;fill:none}
+#g4 .hair2{stroke:var(--rule2);stroke-width:0.8;fill:none}
+#g4 .tagb{fill:none;stroke:var(--muted);stroke-width:0.8}
+#g4 .taga{fill:var(--acct);stroke:var(--accent);stroke-width:0.8}
+#g4 .mk{fill:var(--muted)}
+#g4 .mka{fill:var(--accent)}
+#g4 .hl{fill:var(--hl)}
+</style><marker id="g4-ar" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon class="mk" points="0 0, 8 3, 0 6"/></marker><marker id="g4-ara" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon class="mka" points="0 0, 8 3, 0 6"/></marker></defs><rect width="100%" height="100%" class="pg"/><text x="40" y="36" class="eyb" text-anchor="start">ROUTINE · 하루 한 바퀴</text><text x="40" y="74" class="ttl" text-anchor="start">밤에는 가져오기만, 아침에 한 마디</text><text x="40" y="100" class="sttl" text-anchor="start">자는 사이에 위키가 바뀌지 않아요</text><rect x="40" y="150" width="1120" height="56" rx="6" class="msk"/><rect x="40" y="150" width="1120" height="56" rx="6" class="bx"/><rect x="60" y="169" width="71.4" height="18" rx="2" class="chip"/><text x="95.7" y="182" class="sbs" text-anchor="middle">첫날 한 번</text><text x="147.4" y="184" class="nm" text-anchor="start">둘러봐줘</text><text x="400" y="184" class="sb" text-anchor="start">메일 3개월과 카톡 방 목록의 겉만 1분쯤 세어 표로 보여드려요. 메일 본문은 안 받아요</text><path d="M 166,400 L 442,400" class="ln" marker-end="url(#g4-ar)"/><path d="M 462,400 L 738,400" class="ln" marker-end="url(#g4-ar)"/><path d="M 758,400 L 1034,400" class="ln" marker-end="url(#g4-ar)"/><path d="M 156,342 L 156,394" class="hair2"/><path d="M 452,342 L 452,394" class="hair2"/><path d="M 748,342 L 748,394" class="hair2"/><path d="M 1044,342 L 1044,394" class="hair2"/><rect x="40" y="230" width="232" height="112" rx="6" class="msk"/><rect x="40" y="230" width="232" height="112" rx="6" class="bxin"/><text x="56" y="272" class="nm" text-anchor="start">창고에 가져오기만 해요</text><text x="56" y="298" class="sb" text-anchor="start">작업 스케줄러가 알아서 돌아요</text><text x="56" y="320" class="sb" text-anchor="start">AI를 안 써서 비용이 0이에요</text><circle cx="156" cy="400" r="5" class="mk"/><rect x="336" y="230" width="232" height="112" rx="6" class="msk"/><rect x="336" y="230" width="232" height="112" rx="6" class="bxfc"/><text x="352" y="272" class="nm" text-anchor="start">밀린 거 처리해줘</text><text x="352" y="298" class="sb" text-anchor="start">창고에서 20건을 판정해요</text><text x="352" y="320" class="sb" text-anchor="start">장부와 목차가 같이 채워져요</text><circle cx="452" cy="400" r="5" class="mka"/><rect x="632" y="230" width="232" height="112" rx="6" class="msk"/><rect x="632" y="230" width="232" height="112" rx="6" class="bx"/><text x="648" y="272" class="nm" text-anchor="start">위키에서 찾아줘</text><text x="648" y="298" class="sb" text-anchor="start">목차를 먼저 읽고 답해요</text><text x="648" y="320" class="sb" text-anchor="start">답에 [[출처]]가 붙어요</text><circle cx="748" cy="400" r="5" class="mk"/><rect x="928" y="230" width="232" height="112" rx="6" class="msk"/><rect x="928" y="230" width="232" height="112" rx="6" class="bx"/><text x="944" y="272" class="nm" text-anchor="start">위키 점검해줘</text><text x="944" y="298" class="sb" text-anchor="start">빠진 페이지와 깨진 링크를 세요</text><text x="944" y="320" class="sb" text-anchor="start">먼저 위키 폴더를 복사해 둬요</text><circle cx="1044" cy="400" r="5" class="mk"/><text x="156" y="426" class="keyb" text-anchor="middle">밤 11시</text><text x="156" y="446" class="sbs" text-anchor="middle">컴퓨터가 알아서</text><text x="452" y="426" class="keyb" text-anchor="middle">아침</text><text x="452" y="446" class="sbs" text-anchor="middle">내가 한 마디</text><text x="748" y="426" class="keyb" text-anchor="middle">낮</text><text x="748" y="446" class="sbs" text-anchor="middle">내가 한 마디</text><text x="1044" y="426" class="keyb" text-anchor="middle">주에 한 번쯤</text><text x="1044" y="446" class="sbs" text-anchor="middle">내가 한 마디</text><rect x="40" y="480" width="1120" height="88" rx="8" class="msk"/><rect x="40" y="480" width="1120" height="88" rx="8" class="bxop"/><text x="60" y="508" class="keyb" text-anchor="start">미리 알아 두실 것</text><text x="60" y="532" class="sb" text-anchor="start">컴퓨터가 꺼져 있으면 그 밤은 건너뛰어요. 다음에 켜지면 못 가져온 것부터 이어서 가져와요.</text><text x="60" y="554" class="sb" text-anchor="start">카톡은 대화를 풀 키를 한 번 받아 둬야 밤에도 모아져요. 그 뒤로는 카카오톡이 꺼져 있어도 돼요.</text><rect x="56" y="599" width="220.2" height="8" rx="0" class="hl"/><text x="60" y="608" class="cal" text-anchor="start">아침 한 마디가 하루치를 끝내요.</text><line x1="40" y1="636" x2="1160" y2="636" class="hair"/><text x="40" y="654" class="keyb" text-anchor="start">읽는 법</text><rect x="95.6" y="644" width="16" height="12" rx="2" class="bxin"/><text x="117.6" y="654" class="sb" text-anchor="start">컴퓨터가 알아서 해요</text><rect x="248.7" y="644" width="16" height="12" rx="2" class="bx"/><text x="270.7" y="654" class="sb" text-anchor="start">내가 한 마디 하면 해요</text><rect x="414.4" y="644" width="16" height="12" rx="2" class="bxfc"/><text x="436.4" y="654" class="sb" text-anchor="start">하루에서 가장 중요한 한 마디</text><rect x="611.6" y="644" width="16" height="12" rx="2" class="bxop"/><text x="633.6" y="654" class="sb" text-anchor="start">미리 알아 둘 것</text></svg></div><figcaption>하루 한 바퀴. 맨 위 띠는 첫날 한 번 하는 둘러보기예요. 그 아래 네 칸이 매일 도는 한 바퀴고, 밤에는 가져오기만 하고 판단이 들어가는 일은 전부 낮에 한 마디 하실 때 일어나요.</figcaption></figure>
+  <p>가져오기와 판단 말고 <b>첫날 한 번만 하는 일</b>이 하나 있어요. 메일과 카톡의 겉을 훑어서 이름과 방과 광고 보내는 곳을 표로 보여 드리는 둘러보기예요. 그림 맨 위 띠가 그것이고, 아래 네 칸이 그 뒤로 매일 도는 한 바퀴입니다.</p>
+  <p>밤 수집은 AI를 쓰지 않아요. 창고에 파일을 옮겨 놓기만 하는 일이라 <b>사용량이 들지 않습니다.</b> 판단이 들어가는 일은 전부 아침에 한 마디 하실 때 한꺼번에 일어나요.</p>
+  <p>컴퓨터가 꺼져 있으면 그 밤은 건너뜁니다. 대신 못 가져온 건 다음에 이어서 가져와요. 한 달 양이 아주 많으면 몇 번에 나눠서 들어옵니다. 그래서 <b>보통 컴퓨터를 켜 두시는 시각</b>으로 걸어 드립니다.</p>
+</section>
+
+<section id="phrases">
+  <h2><span class="num">05</span>말 한마디 지도</h2>
+  <p class="lede">쓸 수 있는 말은 열세 개인데, 매일 쓰는 건 세 개예요.</p>
+  <figure><p class="fig-hint">그림이 잘려 보이면 옆으로 밀어 보세요</p><div class="fig-box"><svg id="g5" viewBox="0 0 1200 1204" role="img" aria-labelledby="g5-title g5-desc" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block"><title id="g5-title">말 한마디 지도</title><desc id="g5-desc">수강생이 치는 말 열세 개를, 그 말을 맡는 스킬과 그 말 한마디로 파일에 실제로 생기는 일에 짝지어 놓은 지도예요. 위키를 굴리는 말 다섯 개, 카톡과 메일을 붙이는 말 네 개, 연결한 뒤 쓰는 말 네 개로 묶여 있어요. 강조된 세 마디가 매일 쓰는 말이에요.</desc><defs><style>#g5{--paper:#fafaf8;--paper2:#f5f3ed;--ink:#1a1a1a;--muted:#6b6b6b;--soft:#858585;--rule:rgba(26,26,26,0.12);--rule2:#b5b5b5;--accent:#c9422b;--acct:rgba(201,66,43,0.08);--link:#2b4f8c;--hl:#fff066;--boxbg:#ffffff;--stbg:rgba(26,26,26,0.05);--exbg:rgba(26,26,26,0.03);--exline:rgba(26,26,26,0.30);--inbg:rgba(107,107,107,0.10);--opbg:rgba(26,26,26,0.02);--opline:rgba(26,26,26,0.22);--zone:rgba(26,26,26,0.02);--zoneline:rgba(26,26,26,0.10);}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) #g5{--paper:#1e1e1e;--paper2:#2a2a2a;--ink:#e8e4dc;--muted:#a0a0a0;--soft:#7d7d7d;--rule:rgba(232,228,220,0.12);--rule2:#3a3a3a;--accent:#e05a3a;--acct:rgba(224,90,58,0.14);--link:#7fa3d4;--hl:#fff066;--boxbg:#262626;--stbg:rgba(232,228,220,0.07);--exbg:rgba(232,228,220,0.04);--exline:rgba(232,228,220,0.32);--inbg:rgba(160,160,160,0.14);--opbg:rgba(232,228,220,0.03);--opline:rgba(232,228,220,0.24);--zone:rgba(232,228,220,0.03);--zoneline:rgba(232,228,220,0.11);}}
+:root[data-theme="dark"] #g5{--paper:#1e1e1e;--paper2:#2a2a2a;--ink:#e8e4dc;--muted:#a0a0a0;--soft:#7d7d7d;--rule:rgba(232,228,220,0.12);--rule2:#3a3a3a;--accent:#e05a3a;--acct:rgba(224,90,58,0.14);--link:#7fa3d4;--hl:#fff066;--boxbg:#262626;--stbg:rgba(232,228,220,0.07);--exbg:rgba(232,228,220,0.04);--exline:rgba(232,228,220,0.32);--inbg:rgba(160,160,160,0.14);--opbg:rgba(232,228,220,0.03);--opline:rgba(232,228,220,0.24);--zone:rgba(232,228,220,0.03);--zoneline:rgba(232,228,220,0.11);}
+:root[data-theme="light"] #g5{--paper:#fafaf8;--paper2:#f5f3ed;--ink:#1a1a1a;--muted:#6b6b6b;--soft:#858585;--rule:rgba(26,26,26,0.12);--rule2:#b5b5b5;--accent:#c9422b;--acct:rgba(201,66,43,0.08);--link:#2b4f8c;--hl:#fff066;--boxbg:#ffffff;--stbg:rgba(26,26,26,0.05);--exbg:rgba(26,26,26,0.03);--exline:rgba(26,26,26,0.30);--inbg:rgba(107,107,107,0.10);--opbg:rgba(26,26,26,0.02);--opline:rgba(26,26,26,0.22);--zone:rgba(26,26,26,0.02);--zoneline:rgba(26,26,26,0.10);}
+
+#g5 .pg{fill:var(--paper)}
+#g5 .ttl{font-family:'Gaegu','Nanum Pen Script','Pretendard','Noto Sans KR',cursive;font-size:30px;font-weight:700;fill:var(--ink)}
+#g5 .sttl{font-family:'Pretendard','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:13px;fill:var(--muted)}
+#g5 .eyb{font-family:'Geist Mono','SFMono-Regular',ui-monospace,'Menlo',monospace;font-size:8px;letter-spacing:0.18em;fill:var(--soft)}
+#g5 .keyb{font-family:'Pretendard','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:11px;font-weight:600;fill:var(--soft)}
+#g5 .nm{font-family:'Pretendard','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:13px;font-weight:600;fill:var(--ink)}
+#g5 .nms{font-family:'Pretendard','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:11.5px;font-weight:600;fill:var(--ink)}
+#g5 .sb{font-family:'Pretendard','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:10.5px;fill:var(--muted)}
+#g5 .sbs{font-family:'Pretendard','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:9.5px;fill:var(--soft)}
+#g5 .mn{font-family:'Geist Mono','SFMono-Regular',ui-monospace,'Menlo',monospace;font-size:9px;fill:var(--muted)}
+#g5 .mnb{font-family:'Geist Mono','SFMono-Regular',ui-monospace,'Menlo',monospace;font-size:10.5px;font-weight:500;fill:var(--ink)}
+#g5 .al{font-family:'Pretendard','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:12px;font-weight:500;fill:var(--muted)}
+#g5 .cal{font-family:'Gaegu','Nanum Pen Script','Pretendard','Noto Sans KR',cursive;font-size:17px;fill:var(--ink)}
+#g5 .acc{fill:var(--accent)}
+#g5 .bx{fill:var(--boxbg);stroke:var(--ink);stroke-width:1}
+#g5 .bxst{fill:var(--stbg);stroke:var(--muted);stroke-width:1}
+#g5 .bxin{fill:var(--inbg);stroke:var(--soft);stroke-width:1}
+#g5 .bxop{fill:var(--opbg);stroke:var(--opline);stroke-width:1;stroke-dasharray:4 3}
+#g5 .bxfc{fill:var(--acct);stroke:var(--accent);stroke-width:1.2}
+#g5 .chip{fill:var(--boxbg);stroke:var(--rule2);stroke-width:0.8}
+#g5 .zn{fill:var(--zone);stroke:var(--zoneline);stroke-width:0.8}
+#g5 .msk{fill:var(--paper)}
+#g5 .ln{fill:none;stroke:var(--muted);stroke-width:1.2}
+#g5 .lnd{fill:none;stroke:var(--muted);stroke-width:1;stroke-dasharray:4 3}
+#g5 .hair{stroke:var(--rule);stroke-width:0.8;fill:none}
+#g5 .hair2{stroke:var(--rule2);stroke-width:0.8;fill:none}
+#g5 .tagb{fill:none;stroke:var(--muted);stroke-width:0.8}
+#g5 .taga{fill:var(--acct);stroke:var(--accent);stroke-width:0.8}
+#g5 .mk{fill:var(--muted)}
+#g5 .mka{fill:var(--accent)}
+#g5 .hl{fill:var(--hl)}
+</style><marker id="g5-ar" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon class="mk" points="0 0, 8 3, 0 6"/></marker><marker id="g5-ara" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon class="mka" points="0 0, 8 3, 0 6"/></marker></defs><rect width="100%" height="100%" class="pg"/><text x="40" y="36" class="eyb" text-anchor="start">MAP · 말 한마디 지도</text><text x="40" y="74" class="ttl" text-anchor="start">이 말만 하시면 돼요</text><text x="40" y="100" class="sttl" text-anchor="start">왼쪽이 치는 말, 가운데가 맡는 스킬, 오른쪽이 실제로 생기는 일이에요</text><text x="60" y="142" class="keyb" text-anchor="start">치는 말</text><text x="400" y="142" class="keyb" text-anchor="start">맡는 스킬</text><text x="576" y="142" class="keyb" text-anchor="start">무슨 일이 생기나</text><line x1="40" y1="154" x2="1160" y2="154" class="hair"/><text x="40" y="182" class="keyb" text-anchor="start">위키를 굴리는 말</text><rect x="40" y="194" width="1120" height="56" rx="6" class="msk"/><rect x="40" y="194" width="1120" height="56" rx="6" class="bx"/><text x="60" y="228" class="nm" text-anchor="start">위키 만들어줘</text><rect x="400" y="213" width="148" height="18" rx="2" class="tagb"/><text x="474" y="226" class="mn" text-anchor="middle">llm-wiki-factory</text><text x="576" y="218" class="sb" text-anchor="start">raw/ 와 wiki/ 폴더가 생기고 규칙 파일 다섯 개가 깔려요</text><text x="576" y="238" class="sb" text-anchor="start">CLAUDE.md · index.md · log.md · tags.md · 장부.md 예요</text><rect x="40" y="258" width="1120" height="56" rx="6" class="msk"/><rect x="40" y="258" width="1120" height="56" rx="6" class="bxfc"/><text x="60" y="292" class="nm" text-anchor="start">위키에 넣어줘</text><rect x="400" y="277" width="148" height="18" rx="2" class="taga"/><text x="474" y="290" class="mn" text-anchor="middle">llm-wiki-factory</text><text x="576" y="282" class="sb" text-anchor="start">창고의 새 자료를 20건까지 읽고 올림·버림·보류를 정해요</text><text x="576" y="302" class="sb" text-anchor="start">페이지가 생기고 목차에 한 줄, 장부에 한 줄이 늘어요</text><rect x="40" y="322" width="1120" height="56" rx="6" class="msk"/><rect x="40" y="322" width="1120" height="56" rx="6" class="bxfc"/><text x="60" y="356" class="nm" text-anchor="start">위키에서 찾아줘</text><rect x="400" y="341" width="148" height="18" rx="2" class="taga"/><text x="474" y="354" class="mn" text-anchor="middle">llm-wiki-factory</text><text x="576" y="346" class="sb" text-anchor="start">목차를 먼저 읽고 관련 페이지만 골라서 답해요</text><text x="576" y="366" class="sb" text-anchor="start">답에 [[출처]]가 붙고, 좋은 답은 다시 페이지로 저장돼요</text><rect x="40" y="386" width="1120" height="56" rx="6" class="msk"/><rect x="40" y="386" width="1120" height="56" rx="6" class="bx"/><text x="60" y="420" class="nm" text-anchor="start">위키 점검해줘</text><rect x="400" y="405" width="148" height="18" rx="2" class="tagb"/><text x="474" y="418" class="mn" text-anchor="middle">llm-wiki-factory</text><text x="576" y="410" class="sb" text-anchor="start">목차에 빠진 페이지, 깨진 링크, 출처 없는 페이지를 세요</text><text x="576" y="430" class="sb" text-anchor="start">표로 먼저 보여드리고 고를 것만 고쳐요</text><rect x="40" y="450" width="1120" height="56" rx="6" class="msk"/><rect x="40" y="450" width="1120" height="56" rx="6" class="bx"/><text x="60" y="484" class="nm" text-anchor="start">새로 넣은 자료 처리해줘</text><rect x="400" y="469" width="148" height="18" rx="2" class="tagb"/><text x="474" y="482" class="mn" text-anchor="middle">llm-wiki-factory</text><text x="576" y="474" class="sb" text-anchor="start">위키에 넣어줘와 같은 일이에요. 카톡·메일로 들어온 것까지 같이 봐요</text><text x="576" y="494" class="sb" text-anchor="start">새로 온 것을 먼저 집고 남는 자리를 밀린 것으로 채워요</text><text x="40" y="544" class="keyb" text-anchor="start">카톡과 메일을 붙이는 말</text><rect x="40" y="556" width="1120" height="56" rx="6" class="msk"/><rect x="40" y="556" width="1120" height="56" rx="6" class="bxin"/><text x="60" y="590" class="nm" text-anchor="start">둘러봐줘</text><rect x="400" y="575" width="148" height="18" rx="2" class="tagb"/><text x="474" y="588" class="mn" text-anchor="middle">llm-wiki-inbox</text><text x="576" y="580" class="sb" text-anchor="start">메일 3개월과 카톡 방 목록의 겉만 세어 표로 보여드려요</text><text x="576" y="600" class="sb" text-anchor="start">고른 대로 서랍·내 일 소개·거를 곳·방 목록에 반영돼요</text><rect x="40" y="620" width="1120" height="56" rx="6" class="msk"/><rect x="40" y="620" width="1120" height="56" rx="6" class="bxin"/><text x="60" y="654" class="nm" text-anchor="start">카톡 연결해줘</text><rect x="400" y="639" width="148" height="18" rx="2" class="tagb"/><text x="474" y="652" class="mn" text-anchor="middle">llm-wiki-inbox</text><text x="576" y="644" class="sb" text-anchor="start">방 목록을 보여드리고 고르신 방만 가져와요</text><text x="576" y="664" class="sb" text-anchor="start">raw/카톡/2026-09/ 에 한 방 한 달이 한 파일로 쌓여요</text><rect x="40" y="684" width="1120" height="56" rx="6" class="msk"/><rect x="40" y="684" width="1120" height="56" rx="6" class="bxin"/><text x="60" y="718" class="nm" text-anchor="start">메일 연결해줘</text><rect x="400" y="703" width="148" height="18" rx="2" class="tagb"/><text x="474" y="716" class="mn" text-anchor="middle">llm-wiki-inbox</text><text x="576" y="708" class="sb" text-anchor="start">앱 비밀번호를 컴퓨터 잠금 보관함에 넣고 받은편지함만 봐요</text><text x="576" y="728" class="sb" text-anchor="start">raw/메일/2026-09/ 에 메일 하나가 한 파일로 쌓여요</text><rect x="40" y="748" width="1120" height="56" rx="6" class="msk"/><rect x="40" y="748" width="1120" height="56" rx="6" class="bxin"/><text x="60" y="782" class="nm" text-anchor="start">밤에 알아서 돌게 해줘</text><rect x="400" y="767" width="148" height="18" rx="2" class="tagb"/><text x="474" y="780" class="mn" text-anchor="middle">llm-wiki-inbox</text><text x="576" y="772" class="sb" text-anchor="start">작업 스케줄러에 밤 시각으로 걸어요. 가져오기만 해요</text><text x="576" y="792" class="sb" text-anchor="start">.inbox/ 안에 야간수집 파일과 기록 파일이 생겨요</text><text x="40" y="842" class="keyb" text-anchor="start">연결한 뒤 쓰는 말</text><rect x="40" y="854" width="1120" height="56" rx="6" class="msk"/><rect x="40" y="854" width="1120" height="56" rx="6" class="bxin"/><text x="60" y="888" class="nm" text-anchor="start">새 메일 가져와</text><rect x="400" y="873" width="148" height="18" rx="2" class="tagb"/><text x="474" y="886" class="mn" text-anchor="middle">llm-wiki-inbox</text><text x="576" y="878" class="sb" text-anchor="start">마지막으로 본 시각 이후만 가져와요. 한 시간 겹쳐서 봐요</text><text x="576" y="898" class="sb" text-anchor="start">광고와 알림은 버리지 않고 _걸러짐 폴더로 보내요</text><rect x="40" y="918" width="1120" height="56" rx="6" class="msk"/><rect x="40" y="918" width="1120" height="56" rx="6" class="bxfc"/><text x="60" y="952" class="nm" text-anchor="start">밀린 거 처리해줘</text><rect x="400" y="937" width="148" height="18" rx="2" class="taga"/><text x="474" y="950" class="mn" text-anchor="middle">llm-wiki-factory</text><text x="576" y="942" class="sb" text-anchor="start">창고에 쌓인 것 중 20건을 판정해서 페이지로 올려요</text><text x="576" y="962" class="sb" text-anchor="start">몇 건 남았는지는 llm-wiki-inbox 가 세서 같이 알려드려요</text><rect x="40" y="982" width="1120" height="56" rx="6" class="msk"/><rect x="40" y="982" width="1120" height="56" rx="6" class="bxin"/><text x="60" y="1016" class="nm" text-anchor="start">지금까지 얼마나 들어왔어</text><rect x="400" y="1001" width="148" height="18" rx="2" class="tagb"/><text x="474" y="1014" class="mn" text-anchor="middle">llm-wiki-inbox</text><text x="576" y="1006" class="sb" text-anchor="start">새로 온 것 몇 건, 밀린 것 몇 건 중 몇 건인지 갈라서 알려드려요</text><text x="576" y="1026" class="sb" text-anchor="start">숫자는 어림하지 않고 세서 말해요</text><rect x="40" y="1046" width="1120" height="56" rx="6" class="msk"/><rect x="40" y="1046" width="1120" height="56" rx="6" class="bxin"/><text x="60" y="1080" class="nm" text-anchor="start">자동 수집 꺼줘</text><rect x="400" y="1065" width="148" height="18" rx="2" class="tagb"/><text x="474" y="1078" class="mn" text-anchor="middle">llm-wiki-inbox</text><text x="576" y="1070" class="sb" text-anchor="start">작업 스케줄러에 걸어 둔 밤 수집을 꺼요</text><text x="576" y="1090" class="sb" text-anchor="start">창고에 이미 들어온 파일은 그대로 둬요</text><line x1="40" y1="1140" x2="1160" y2="1140" class="hair"/><text x="40" y="1158" class="keyb" text-anchor="start">읽는 법</text><rect x="95.6" y="1148" width="16" height="12" rx="2" class="bx"/><text x="117.6" y="1158" class="sb" text-anchor="start">llm-wiki-factory 가 맡아요</text><rect x="297.0" y="1148" width="16" height="12" rx="2" class="bxin"/><text x="319.0" y="1158" class="sb" text-anchor="start">llm-wiki-inbox 가 맡아요</text><rect x="485.8" y="1148" width="16" height="12" rx="2" class="bxfc"/><text x="507.8" y="1158" class="sb" text-anchor="start">매일 쓰는 세 마디</text></svg></div><figcaption>말 한마디 지도. 왼쪽이 치는 말, 가운데가 그 말을 맡는 스킬, 오른쪽이 파일에 실제로 생기는 일이에요.</figcaption></figure>
+  <p>외우려고 하지 않으셔도 됩니다. 하고 싶은 일을 평소 말로 하시면 Claude가 알아듣고 맞는 스킬을 꺼내요. 위 지도는 <b>어느 말이 무슨 파일을 건드리는지</b> 확인하실 때 보시면 됩니다.</p>
+</section>
+
+<section id="first30">
+  <h2><span class="num">06</span>설치하고 첫 30분</h2>
+  <p class="lede">Claude Code에 이 한 줄만 하시면 돼요.</p>
+  <p class="ask">"https://github.com/huhsame/llm-wiki-factory 여기 들어가서 세팅해줘"</p>
+  <p class="note">따로 설치 명령을 외우지 않으셔도 됩니다. 저장소 주소만 주고 시키는 방식은 수업에서 이미 해 보신 그대로예요.</p>
+  <pre><code>나      https://github.com/huhsame/llm-wiki-factory 여기 들어가서 세팅해줘
+
+Claude  1. 저장소를 임시 폴더로 받아요
+           git 이 있으면 clone, 없으면 zip 으로 받아서 풀어요
+        2. skills 안의 두 폴더를 내 컴퓨터 스킬 자리로 옮겨요
+           llm-wiki-factory   위키를 만들고 판정해요
+           llm-wiki-inbox     카톡·메일을 창고로 가져와요
+        3. SKILL.md 두 개가 제자리에 있는지 확인해요
+        4. 임시로 받아 둔 폴더를 지워요
+        5. "다 됐어요. Claude 를 껐다 켜거나 새 대화를 연 다음
+           '위키 만들어줘'라고 하세요."</code></pre>
+  <p class="note">이미 깔려 있으면 덮어쓰기 전에 한 번 여쭤봐요. 답을 듣고 나서 복사합니다.</p>
+  <div class="callout">
+    <p><b>깔고 나면 Claude를 껐다 켜 주세요.</b> 스킬 목록은 대화가 시작될 때 한 번 읽혀요. 그래서 방금 깐 스킬은 설치하던 그 대화에서는 아직 안 보입니다. 껐다 켜시거나 새 대화를 열면 잡혀요.</p>
+  </div>
+
+  <h3>설치 뒤 첫 30분</h3>
+  <ol class="steps">
+    <li><b>위키 만들기</b><span class="t">3분 · Claude 껐다 켠 다음 "위키 만들어줘"</span>질문은 하나예요. "무슨 자료를 모을 위키예요?" 답하시면 폴더 두 개와 파일 다섯 개가 생깁니다. 넣을 자료가 아직 없으시면 세 가지를 더 여쭤봐요.</li>
+    <li><b>자료 세 개 넣기</b><span class="t">10분 · "위키에 넣어줘"</span>회의록이든 견적서든 메일이든 아무거나 <code>raw/</code> 폴더에 넣고 말씀만 하세요. 올림과 버림은 안 여쭤보고 정해 드리고, 보류만 모아서 한 번에 보여 드려요.</li>
+    <li><b>물어보기</b><span class="t">5분 · "위키에서 찾아줘"</span>방금 넣은 자료에서 금액이나 날짜를 물어보세요. 답에 출처 페이지가 붙는지 꼭 확인해 보시면 좋아요.</li>
+    <li><b>연결하기</b><span class="t">10분 · "카톡 연결해줘" 또는 "메일 연결해줘"</span>질문 여섯 개 안에 끝납니다. 예전 것을 몇 개월치 받을지, 밤에 자동으로 돌릴지만 골라 주시면 돼요. 카톡 쪽 둘러보기는 방을 고르실 때 같이 돌고, 메일 쪽은 앱 비밀번호를 저장한 다음 첫 수집 직전에 돌아요. 카톡만 붙이시면 앱 비밀번호 단계는 건너뛰세요.</li>
+  </ol>
+  <div class="callout">
+    <p><b>연결한 다음 한 마디, "둘러봐줘".</b> 메일함의 머리(보낸 사람·제목·날짜)와 카톡 방 목록의 겉만 1분쯤 세어서 표로 보여 드려요. <b>메일 본문은 받지 않고, 카톡 대화는 몇 줄인지만 세고 어디에도 남기지 않아요. AI도 안 써요.</b> 카톡 1년치 대화를 AI가 통째로 읽는 일은 없습니다. 메일이 아주 많으면 몇 분 걸릴 수 있어요.</p>
+    <p>순서는 <b>먼저 훑고, 표로 보여 드리고, 고르시는 것</b>이에요. 여쭤보는 건 세 가지뿐입니다. 업무가 아닌 이름 빼기, 넣을 카톡 방 고르기, 광고 보내는 곳 거르기예요. 고르신 답이 서랍 세 줄과 규칙 파일 맨 위 「내 일 소개」 한 문단으로 들어가고, 거를 곳 목록과 방 등록에도 반영돼요. 첫날 한 번이면 됩니다.</p>
+  </div>
+</section>
+
+<section id="safety">
+  <h2><span class="num">07</span>안전 규칙 넷</h2>
+  <p class="lede">안 하는 일을 먼저 알려 드릴게요. 이 넷은 어떤 경우에도 지킵니다.</p>
+  <div class="cards">
+    <div class="card">
+      <h3>원본은 안 고쳐요</h3>
+      <p>창고에 넣으신 파일은 이름도 내용도 바꾸지 않아요. 읽기만 하고, 정리한 내용은 위키 쪽에만 씁니다. 변환본을 창고에 새로 만들지도 않아요.</p>
+    </div>
+    <div class="card">
+      <h3>비밀번호는 제가 안 쳐요</h3>
+      <p>앱 비밀번호를 저장하는 한 줄은 <b>직접 여신 창에서</b> 치시게 해요. 대화 기록에도 명령 기록에도 남지 않게 하려는 거예요. 저장된 뒤에는 있는지만 확인하고 값은 안 봅니다.</p>
+    </div>
+    <div class="card">
+      <h3>연락처는 위키에 안 적어요</h3>
+      <p>전화번호와 개인 메일 주소는 위키 페이지에 옮기지 않아요. 창고의 원본에만 두고 경로로 가리킵니다. 이름과 소속, 직함, 정해진 사실은 그대로 남겨요.</p>
+    </div>
+    <div class="card">
+      <h3>자는 사이에 안 바뀌어요</h3>
+      <p>밤에 도는 건 가져오기뿐이에요. 판정과 페이지 쓰기는 사용자가 한 마디 하실 때만 합니다. 아침에 열어 보시면 어제 그대로예요.</p>
+    </div>
+  </div>
+</section>
+
+<section id="stuck">
+  <h2><span class="num">08</span>막혔을 때</h2>
+  <p class="lede">자주 걸리는 건 이 셋이에요.</p>
+  <div class="table-scroll">
+  <table>
+    <caption class="visually-hidden"></caption>
+    <thead><tr><th scope="col">이런 말이 나오면</th><th scope="col">이렇게 해 보세요</th></tr></thead>
+    <tbody>
+      <tr><td>네이버 메일이 안 붙어요</td><td>네이버는 세 가지를 다 켜셔야 해요. IMAP 사용함, 동기화할 메일 수 5,000통, 그리고 2단계를 쓰신다면 애플리케이션 비밀번호입니다. 하나만 켜면 안 돼요.</td></tr>
+      <tr><td>비밀번호가 틀렸대요</td><td>평소 쓰시는 비밀번호 말고 <b>앱 비밀번호 16자리</b>를 공백 없이 넣어 주세요. 지문이나 얼굴 로그인은 프로그램에 넣을 수 없어요.</td></tr>
+      <tr><td>파이썬이 없대요</td><td>python.org 에서 Windows 설치 파일을 받으시고, 설치할 때 <b>Add python.exe to PATH</b> 를 꼭 체크해 주세요. 설치가 끝나면 Claude 앱을 껐다 켜시면 됩니다.</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p style="margin-top:20px">그래도 안 되면 <b>무엇을 하려다 어디서 멈췄는지</b> 한 줄로 적어서 보내 주세요. 화면 사진이 있으면 더 좋아요.</p>
+  <p>huhsame.com 게시판 또는 <a href="mailto:ai@huhsame.com">ai@huhsame.com</a></p>
+</section>
+
+</main>
+
+<footer>
+  <p><b>아직 확인 안 된 것</b> · 위키 본체(llm-wiki-factory)는 자료 15건으로 macOS에서 끝까지 돌려 봤고, <b>Windows 실제 컴퓨터와 자료 100건 이상은 아직입니다.</b> 카톡과 메일 수집(llm-wiki-inbox)은 가짜 데이터로 돌려 본 것까지만 마쳤어요. 둘러보기도 가짜 자료로만 돌려 봤습니다. 실제 네이버·지메일 계정 연결과 Windows 밤 수집은 아직 돌려 보지 못했습니다. 막히는 게 나오면 알려 주세요. 그게 다음 버전이 됩니다.</p>
+  <p class="colophon">허세임 · huhsame.com · ai@huhsame.com · MIT 라이선스</p>
+</footer>
+
+</div>
+
+</body>
+</html>

@@ -4,5 +4,6 @@
  "updated_at": null,
  "realtime_files": [],
  "mail_filter_domains": [],
+ "survey": null,
  "sources": {}
 }
