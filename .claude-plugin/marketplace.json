@@ -5,13 +5,13 @@
     "email": "ai@huhsame.com",
     "url": "https://huhsame.com"
   },
-  "description": "카파시의 LLM Wiki를 비개발자가 첫날 혼자 굴릴 수 있게 만든 스킬",
+  "description": "카파시의 LLM Wiki를 비개발자가 첫날 혼자 굴릴 수 있게 만든 스킬 두 개. 위키 본체와 카톡·메일 수집.",
   "plugins": [
     {
       "name": "llm-wiki-factory",
       "source": "./",
-      "description": "내 자료를 AI가 정리하는 개인 지식 위키를 만들고 굴린다. 수업에서 본 네 칸(원본 창고·판정·위키·목차)에 바닥 장부를 더한 다섯 칸으로 시작해 자료를 넣고, 물어보고, 어긋난 데를 점검한다. 따로 깔 프로그램도, 깃도, 인터넷 연결도 필요 없다.",
-      "version": "0.1.0",
+      "description": "내 자료를 AI가 정리하는 개인 지식 위키를 만들고 굴린다. 스킬 두 개다. llm-wiki-factory 는 수업에서 본 네 칸(원본 창고·판정·위키·목차)에 바닥 장부를 더한 다섯 칸으로 자료를 넣고, 물어보고, 어긋난 데를 점검한다. llm-wiki-inbox 는 카톡과 메일을 그 창고로 가져오기만 하되, 새로 오는 것과 밀린 것을 두 트랙으로 나눠 밤마다 자동으로 받아 둔다. 위키 본체는 따로 깔 프로그램도, 깃도, 인터넷 연결도 필요 없다.",
+      "version": "0.2.0",
       "category": "productivity",
       "keywords": [
         "llm-wiki",
@@ -21,7 +21,10 @@
         "okf",
         "korean",
         "windows",
-        "beginner"
+        "beginner",
+        "kakaotalk",
+        "email",
+        "imap"
       ]
     }
   ]

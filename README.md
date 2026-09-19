@@ -10,6 +10,17 @@
 
 ---
 
+## 스킬 두 개
+
+| 스킬 | 하는 일 | 첫 마디 |
+|---|---|---|
+| **llm-wiki-factory** | 위키를 만들고, 자료를 읽고 판정해 페이지로 씁니다 | "위키 만들어줘" |
+| **llm-wiki-inbox** | 카톡과 메일을 위키 창고로 **가져오기만** 합니다 | "카톡 연결해줘" · "메일 연결해줘" |
+
+**가져오기와 판정은 일부러 갈라 뒀습니다.** 밤에 자동으로 도는 건 가져오기뿐입니다. 판단은 아침에 한 마디 하실 때만 합니다. 그래서 자는 사이에 위키가 바뀌는 일이 없습니다.
+
+---
+
 ## 설치
 
 ```
@@ -44,6 +55,20 @@
 
 ---
 
+## 카톡·메일 연결은 llm-wiki-inbox
+
+자료를 손으로 넣는 게 번거로워지면 **"카톡 연결해줘"** 또는 **"메일 연결해줘"** 라고 하세요. 두 번째 스킬이 질문 다섯 개 안에서 세팅을 끝냅니다.
+
+- **메일** · 앱 비밀번호와 IMAP 하나로 지메일·네이버·회사 메일을 같은 방법으로 가져옵니다. 받은편지함만 보고, 읽음 표시를 바꾸지 않습니다. 광고·알림은 버리지 않고 `_걸러짐` 폴더로 보냅니다.
+- **카톡** · 수업에서 받은 카톡 읽기 스킬이 있으면 그 결과를 창고로 옮깁니다(Windows 전용). 없으면 카카오톡 PC의 **대화 내보내기** 로도 됩니다.
+- **두 트랙** · 새로 오는 것은 마지막으로 본 시각 이후만, 예전 것은 오래된 달부터 조금씩 받습니다. 1년치를 고르셔도 창고에 받아만 두고 회차마다 스무 건씩 정리합니다.
+- **밤마다 자동** · 윈도우 작업 스케줄러(맥은 launchd)에 한 줄 걸면 가져오기만 자동으로 돕니다. AI 사용량이 들지 않습니다.
+- **비밀번호** · 화면에도 파일에도 남기지 않습니다. 윈도우는 그 사용자만 풀 수 있는 잠금으로, 맥은 키체인에 둡니다.
+
+메일 수집과 카톡 옮기기에는 **파이썬이 필요합니다**(표준 기능만 씁니다. `pip` 로 받을 건 없습니다). 위키 본체(llm-wiki-factory)는 여전히 아무것도 필요 없습니다.
+
+---
+
 ## 막아주는 사고 다섯 가지
 
 **① 파일 15개를 페이지 15장으로 그냥 옮기기**
@@ -67,7 +92,7 @@
 
 **옵시디언으로 볼 수 있나요?** 위키 폴더를 볼트로 열기만 하면 됩니다. 플러그인은 필요 없습니다. `[[링크]]`를 쓰고 페이지 맨 위 정보를 한 줄짜리 값으로만 쓴 게 이것 때문입니다.
 
-**뭘 깔아야 하나요?** 아닙니다. 이건 프로그램이 아니라 **규칙 모음**입니다. 설치할 것도, 깃도, 네트워크를 쓰는 것도 없습니다. Claude가 자료를 정리하기 전에 읽는 문서 한 장과 **파일 틀 다섯 개, 페이지 틀 하나**가 전부입니다. Word·PPT·메일이 잘 안 읽히는 경우에만 파이썬에 처음부터 들어 있는 기능으로 글자를 뽑습니다. 따로 받을 건 없습니다.
+**뭘 깔아야 하나요?** 위키 본체는 아닙니다. 이건 프로그램이 아니라 **규칙 모음**입니다. 설치할 것도, 깃도, 네트워크를 쓰는 것도 없습니다. Claude가 자료를 정리하기 전에 읽는 문서 한 장과 **파일 틀 다섯 개, 페이지 틀 하나**가 전부입니다. Word·PPT·메일이 잘 안 읽히는 경우에만 파이썬에 처음부터 들어 있는 기능으로 글자를 뽑습니다. 따로 받을 건 없습니다. 카톡·메일 자동 수집(llm-wiki-inbox)을 쓰실 때만 파이썬이 깔려 있어야 하고, 그때도 표준 기능만 씁니다.
 
 **이미 제 손으로 위키를 만들었는데요.** 그대로 두고 "위키 점검해줘"만 돌려 보세요. 목차에 빠진 페이지와 어긋나는 내용을 찾아 줍니다.
 
@@ -92,7 +117,25 @@ Windows 한글 환경과 비개발자 사용을 기준으로 만들었습니다.
 | 점검 | 세는 것 다섯이 전부 0 |
 | 같은 자료 다시 넣기 | 이름이 같을 때도, `(1)`이 붙었을 때도 알아봤습니다 |
 
-**아직 안 돌려 본 것**은 Windows 실제 환경, 자료 100건 이상, 그리고 정해진 시각에 자동으로 돌리는 4단계입니다. 4단계는 문서로만 안내하고 있습니다.
+**llm-wiki-inbox(카톡·메일 수집)는 2026-09-19 기준 모의 테스트만 마쳤습니다.** 가짜 카톡 CLI와 가짜 메일 서버로 다음을 돌렸습니다.
+
+| 돌려 본 것 | 결과 |
+|---|---|
+| 카톡 6개월 백필(방 2개) | 월 파일 12개, 보고 숫자와 파일 안 줄 수가 같음(36 = 36) |
+| 같은 명령 세 번 | 파일 내용 그대로 |
+| 방 하나가 막혔을 때 | 나머지 방은 다 돌고, 막힌 방만 그 자리에 멈춤. 종료코드 2 |
+| 메일 6개월 백필 | 회차마다 3개월씩 두 번에 끝남 |
+| 새 메일 1통 도착 | 새로 온 것 1 · 밀린 것 6 으로 갈려서 보고됨 |
+| 같은 등록 명령 재실행 | 진행 상태(커서·마지막 시각·건수) 보존 |
+| 날짜 헤더가 깨진 메일 | 서버 도착 시각으로 대신하고, 그것도 없으면 `dropped` 로 셈 |
+| 한 달 메일이 상한을 넘을 때 | `truncated` 로 몇 통 중 몇 통인지 보고 |
+| 장부 파일 이름이 NFD일 때 | 그대로 읽힘. 못 찾으면 못 찾았다고 알려 줌 |
+| 예상 못 한 오류(읽기 권한 없음) | JSON 한 줄 + 종료코드 3, 트레이스백 없음 |
+| 앱 비밀번호 | 창고·위키·상태 파일·화면 어디에도 0건. 맥 키체인 왕복 확인 |
+
+**실제 네이버·지메일 계정 연결, 실제 카카오톡 PC, Windows 작업 스케줄러 등록은 아직 돌려 보지 않았습니다.** 야간 수집 배치 파일(`야간수집.cmd`)도 아직 Windows에서 돌려 보지 못했습니다.
+
+**그 밖에 아직 안 돌려 본 것**은 Windows 실제 환경, 자료 100건 이상입니다.
 
 카파시의 LLM Wiki 구상과 구글의 Open Knowledge Format에서 개념을 가져왔습니다. 원문은 스킬 맨 아래 링크에 있습니다.
 
@@ -100,7 +143,7 @@ Windows 한글 환경과 비개발자 사용을 기준으로 만들었습니다.
 
 ## In English
 
-Your files pile up, and you still can't answer "how much was that quote?" This skill has Claude build a small wiki next to your files: you drop originals into `raw/`, say "put this in the wiki" in Korean or English, and Claude decides what to promote, what to drop (with a reason, in a ledger), and what to ask you about. Every page lands in a one-line index, every answer cites its page, and a weekly check counts what's missing or contradictory. Nothing to install, no git, no network. It is a set of rules plus five file templates and one page template, written for Windows users with Korean filenames who are not developers. Obsidian works out of the box.
+Your files pile up, and you still can't answer "how much was that quote?" This skill has Claude build a small wiki next to your files: you drop originals into `raw/`, say "put this in the wiki" in Korean or English, and Claude decides what to promote, what to drop (with a reason, in a ledger), and what to ask you about. Every page lands in a one-line index, every answer cites its page, and a weekly check counts what's missing or contradictory. Nothing to install, no git, no network. It is a set of rules plus five file templates and one page template, written for Windows users with Korean filenames who are not developers. Obsidian works out of the box. A second skill, `llm-wiki-inbox`, pulls KakaoTalk and email into the same `raw/` folder on two tracks (new mail since last run, plus an old backlog drained a month at a time) using only the Python standard library; app passwords are stored in Windows DPAPI or the macOS keychain, never in a file you can read. It has been smoke-tested with fixtures only, not against live accounts.
 
 ---
 
